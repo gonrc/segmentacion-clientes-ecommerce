@@ -1,0 +1,34 @@
+{
+  "template": "/Users/grc/My Drive (gonrc98@gmail.com)/Gestión de Negocios/8q - 1er cuat 2026/Ciencia de datos aplicada/data-science-project-template",
+  "commit": "b2ad3d88a86e5e448893659821ce66efff2ccc7f",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "project_name": "Segmentacion Clientes Ecommerce",
+      "repo_name": "segmentacion-clientes-ecommerce",
+      "github_username": "grupo-12-itba",
+      "author_name": "Grupo 12 - ITBA",
+      "author_email": "grupo12@itba.edu.ar",
+      "description": "Segmentacion de clientes y analisis comercial para optimizar decisiones en un e-commerce basado en el dataset Online Retail de UCI",
+      "compatible_python_versions": "3.11",
+      "mkdocs": true,
+      "codecov": true,
+      "license": "MIT License",
+      "_copy_without_render": [
+        ".code_quality/*",
+        ".vscode/*",
+        "config/*",
+        "data/*",
+        "src/*",
+        "tests/*",
+        ".editorconfig",
+        ".pre-commit-config.yaml",
+        "codecov.yaml",
+        "docs/*"
+      ],
+      "_template": "/Users/grc/My Drive (gonrc98@gmail.com)/Gestión de Negocios/8q - 1er cuat 2026/Ciencia de datos aplicada/data-science-project-template",
+      "_commit": "b2ad3d88a86e5e448893659821ce66efff2ccc7f"
+    }
+  },
+  "directory": null
+}

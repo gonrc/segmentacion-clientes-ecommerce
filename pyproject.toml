@@ -1,5 +1,5 @@
 [project]
-name = "Segmentacion Clientes Ecommerce"
+name = "segmentacion-clientes-ecommerce"
 version = "0.1.0"
 description = "Segmentacion de clientes y analisis comercial para optimizar decisiones en un e-commerce basado en el dataset Online Retail de UCI"
 authors = [
@@ -9,7 +9,10 @@ requires-python = ">=3.11"
 readme = "README.md"
 
 dependencies = [
-
+    "numpy>=2.4.3",
+    "pandas[parquet]>=3.0.1",
+    "scikit-learn>=1.8.0",
+    "scipy>=1.17.1",
 ]
 
 [project.urls]
@@ -24,6 +27,9 @@ dev = [
     "pytest-cookies>=0.7.0",
     "pytest-cov>=7.0.0",
     "cruft[pyproject]>=2.16.0",# Automated Cookiecutter template synchronization
+    "jupyter>=1.1.1",
+    "matplotlib>=3.10.8",
+    "seaborn>=0.13.2",
 ]
 
 #

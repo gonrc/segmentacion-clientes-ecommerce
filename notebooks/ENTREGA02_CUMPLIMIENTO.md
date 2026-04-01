@@ -168,7 +168,7 @@ Este trabajo se realizó para fortalecer la **Entrega 03** con features adiciona
 1-10. ✅ 10 gráficos PNG en `data/08_reporting/`
 
 ### Documentación:
-- ✅ `notebooks/REQUISITOS_ENTREGA02.md` - Checklist de cumplimiento al 100%
+- ✅ `notebooks/ENTREGA02_CUMPLIMIENTO.md` - Checklist de cumplimiento al 100%
 - ✅ PDFs: `[01] Propuesta de proyecto - Grupo 12 - Ecommerce.pdf`
 - ✅ PDFs: `[02] Recopilación y preparación de datos.pdf`
 

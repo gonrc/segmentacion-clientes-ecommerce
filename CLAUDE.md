@@ -91,7 +91,7 @@ Se realizó exploración exhaustiva del campo `Description` (25/03/2026) identif
 - `data/04_feature/rfm_clientes_detalle.parquet` (113 KB)
 - `data/08_reporting/*.png` (10 visualizaciones)
 
-**Verificación:** Ver `notebooks/REQUISITOS_ENTREGA02.md` para cumplimiento 100% con PDF de consigna
+**Verificación:** Ver `notebooks/ENTREGA02_CUMPLIMIENTO.md` para cumplimiento 100% con PDF de consigna
 
 ### Entrega 03 - Modelado y Presentación (23/06/2026)
 **Contenido esperado:**
@@ -668,7 +668,7 @@ def execute_notebook(notebook_path):
 - Los notebooks SE suben a GitHub con sus outputs completos (las visualizaciones están embebidas)
 
 ### Archivos Clave para Entrega 02
-- `notebooks/REQUISITOS_ENTREGA02.md` - Checklist de cumplimiento al 100%
+- `notebooks/ENTREGA02_CUMPLIMIENTO.md` - Checklist de cumplimiento al 100%
 - Notebooks 01, 02, 04 ejecutados con datos reales
 - Justificación del dataset en notebook 01, celda 2
 - Reflexión final completa en notebook 04, última celda

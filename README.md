@@ -1,10 +1,11 @@
 # Segmentacion de Clientes y Analisis Comercial en E-commerce
 
-[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)](https://github.com/charliermarsh/ruff)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
 **Trabajo Practico - Ciencia de Datos Aplicada | ITBA | 1er Cuatrimestre 2026 | Grupo 12**
+
+> **Estado actual (01/04/2026):** ✅ Entrega 02 completada | 🔄 Enriquecimiento de datos en progreso | ⏳ Entrega 03 pendiente
 
 ---
 
@@ -52,8 +53,8 @@ Descarga directa: [online+retail.zip](https://archive.ics.uci.edu/static/public/
 ### Requisitos previos
 
 - [Git](https://git-scm.com/)
-- [Make](https://www.gnu.org/software/make/)
-- [UV](https://docs.astral.sh/uv/) (gestor de Python, dependencias y entornos virtuales)
+- [Python](https://www.python.org/) >= 3.11
+- [Make](https://www.gnu.org/software/make/) (opcional)
 
 ### Instalacion
 
@@ -61,25 +62,24 @@ Descarga directa: [online+retail.zip](https://archive.ics.uci.edu/static/public/
 git clone https://github.com/gonrc/segmentacion-clientes-ecommerce.git
 cd segmentacion-clientes-ecommerce
 
-make install_env            # Instala dependencias y configura pre-commit
-source .venv/bin/activate   # Activa el entorno virtual
-make install_data_libs      # Instala pandas, scikit-learn, jupyter, seaborn
+# Crear entorno virtual
+python3 -m venv .venv
+source .venv/bin/activate  # En Windows: .venv\Scripts\activate
+
+# Instalar dependencias
+pip install pandas openpyxl pyarrow matplotlib seaborn jupyter nbconvert scikit-learn
 ```
 
 ### Agregar el dataset
 
-Descargar `Online Retail.xlsx` desde [UCI](https://archive.ics.uci.edu/dataset/352/online+retail) y colocarlo en:
-
-```
-data/01_raw/Online Retail.xlsx
-```
-
-### Instalar dependencias adicionales
+Descargar y descomprimir `Online Retail.xlsx`:
 
 ```bash
-uv add <paquete>                  # Dependencia del proyecto
-uv add --group dev <paquete>      # Dependencia de desarrollo
+curl -L -o data/01_raw/online_retail.zip https://archive.ics.uci.edu/static/public/352/online+retail.zip
+unzip data/01_raw/online_retail.zip -d data/01_raw/
 ```
+
+O descargar manualmente desde [UCI](https://archive.ics.uci.edu/dataset/352/online+retail) y colocar en `data/01_raw/Online Retail.xlsx`
 
 ## Estructura del proyecto
 
@@ -117,20 +117,41 @@ uv add --group dev <paquete>      # Dependencia de desarrollo
 
 ## Roadmap del proyecto
 
-| Entrega | Fecha limite | Contenido |
-|---------|-------------|-----------|
-| **1ra** | 24/03/2026 | Propuesta de proyecto: problema, objetivos, datos, viabilidad |
-| **2da** | 28/04/2026 | Recopilacion y preparacion de datos: limpieza, EDA, features |
-| **3ra** | 23/06/2026 | Modelado, despliegue y comunicacion de resultados |
+| Entrega | Fecha limite | Estado | Contenido |
+|---------|-------------|--------|-----------|
+| **1ra** | 24/03/2026 | ✅ Completada (25/03/2026) | Propuesta de proyecto: problema, objetivos, datos, viabilidad |
+| **2da** | 28/04/2026 | ✅ Completada (24/03/2026) | Recopilacion y preparacion de datos: limpieza, EDA, features RFM |
+| **Post-feedback** | - | 🔄 En progreso | Enriquecimiento de dataset con extraccion de atributos (colores, materiales, estilos) |
+| **3ra** | 23/06/2026 | ⏳ Pendiente | Clustering, segmentacion avanzada, prototipo y presentacion |
 
-## Comandos utiles
+### Notebooks entregados
+
+**Entrega 02 (24/03/2026):**
+- `01-gc-carga_y_limpieza-2026_03_18.ipynb` - Carga, limpieza y justificacion del dataset
+- `02-gc-eda_ventas-2026_03_18.ipynb` - Analisis exploratorio con 10 visualizaciones
+- `04-gc-rfm_por_cliente-2026_03_18.ipynb` - Feature engineering RFM y reflexion final
+
+**Trabajo adicional (01/04/2026):**
+- `05-gc-product_enrichment_regex-2026_04_01.ipynb` - Extraccion de atributos con regex
+- `06-gc-customer_product_profile-2026_04_01.ipynb` - Perfiles de cliente por preferencias de producto
+
+## Notebooks y analisis
+
+### Ejecutar notebooks
 
 ```bash
-make help                 # Ver todos los comandos disponibles
-make test                 # Correr tests con pytest
-make check                # Correr linting y formateo
-make docs                 # Construir y servir documentacion
+jupyter notebook  # Abrir interfaz de Jupyter
 ```
+
+Los notebooks estan organizados por fase en `notebooks/`:
+- `1-data/` - Carga y limpieza
+- `2-exploration/` - Analisis exploratorio
+- `4-feat_eng/` - Ingenieria de features (RFM, atributos de producto)
+- `5-models/` - Clustering y segmentacion (proximo)
+
+### Verificacion de cumplimiento
+
+Ver `notebooks/ENTREGA02_CUMPLIMIENTO.md` para detalles de cumplimiento de requisitos de la Entrega 02.
 
 ## Creditos
 

@@ -5,7 +5,7 @@
 
 **Trabajo Practico - Ciencia de Datos Aplicada | ITBA | 1er Cuatrimestre 2026 | Grupo 12**
 
-> **Estado actual (01/04/2026):** ✅ Entrega 02 completada | 🔄 Enriquecimiento de datos en progreso | ⏳ Entrega 03 pendiente
+> **Estado actual (03/04/2026):** ✅ Entrega 02 completada con enriquecimiento | ✅ Dataset enriquecido (+50 atributos/producto) | ⏳ Entrega 03 pendiente
 
 ---
 
@@ -42,11 +42,23 @@ La empresa cuenta con datos de transacciones pero no dispone de una vision clara
 |----------|---------|
 | **Fuente** | [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/352/online+retail) |
 | **Archivo** | `Online Retail.xlsx` |
-| **Registros** | 541.909 transacciones |
+| **Registros** | 541.909 transacciones originales → 397.884 validas (post-limpieza) |
 | **Periodo** | 01/12/2010 - 09/12/2011 |
-| **Variables** | InvoiceNo, StockCode, Description, Quantity, InvoiceDate, UnitPrice, CustomerID, Country |
+| **Variables originales** | InvoiceNo, StockCode, Description, Quantity, InvoiceDate, UnitPrice, CustomerID, Country |
+| **Variables enriquecidas** | +50 atributos por producto (color, material, tamaño, estilo, flags, métricas) |
 
 Descarga directa: [online+retail.zip](https://archive.ics.uci.edu/static/public/352/online+retail.zip)
+
+### Enriquecimiento del Dataset
+
+En respuesta al feedback de la Entrega 01, implementamos un proceso de **enriquecimiento del campo `Description`** para extraer atributos latentes de los productos:
+
+- **3.877 productos unicos** enriquecidos con expresiones regulares (regex)
+- **59.68%** de productos tienen al menos 1 atributo detectado
+- **Atributos extraidos:** 15 colores, 13 materiales, 6 tamanos, 9 estilos, identificacion de sets/packs
+- **Resultado:** Dataset con **58 columnas por producto** (8 originales + 50 derivadas)
+
+Ver notebook: `notebooks/4-feat_eng/05-gc-product_enrichment_regex-2026_04_01.ipynb`
 
 ## Configuracion del entorno
 
@@ -130,20 +142,22 @@ O descargar manualmente desde [UCI](https://archive.ics.uci.edu/dataset/352/onli
 | Entrega | Fecha limite | Estado | Contenido |
 |---------|-------------|--------|-----------|
 | **1ra** | 24/03/2026 | ✅ Completada (25/03/2026) | Propuesta de proyecto: problema, objetivos, datos, viabilidad |
-| **2da** | 28/04/2026 | ✅ Completada (24/03/2026) | Recopilacion y preparacion de datos: limpieza, EDA, features RFM |
-| **Post-feedback** | - | 🔄 En progreso | Enriquecimiento de dataset con extraccion de atributos (colores, materiales, estilos) |
-| **3ra** | 23/06/2026 | ⏳ Pendiente | Clustering, segmentacion avanzada, prototipo y presentacion |
+| **2da** | 28/04/2026 | ✅ Completada (actualizada 03/04/2026) | Recopilacion y preparacion de datos: limpieza, EDA, features RFM + enriquecimiento |
+| **Post-feedback** | - | ✅ Completada (01/04/2026) | Enriquecimiento Fase 1: +50 atributos/producto con regex (colores, materiales, estilos, tamaños) |
+| **3ra** | 23/06/2026 | ⏳ Pendiente | Clustering con features enriquecidos, segmentacion avanzada, prototipo y presentacion |
 
 ### Notebooks entregados
 
-**Entrega 02 (24/03/2026):**
+**Entrega 02 (actualizada 03/04/2026):**
 - `01-gc-carga_y_limpieza-2026_03_18.ipynb` - Carga, limpieza y justificacion del dataset
-- `02-gc-eda_ventas-2026_03_18.ipynb` - Analisis exploratorio con 10 visualizaciones
+- `02-gc-eda_ventas-2026_03_18.ipynb` - Analisis exploratorio con **14 visualizaciones** (10 EDA + 4 enriquecimiento)
 - `04-gc-rfm_por_cliente-2026_03_18.ipynb` - Feature engineering RFM y reflexion final
+- `05-gc-product_enrichment_regex-2026_04_01.ipynb` - **Enriquecimiento de productos** con regex (Fase 1)
 
-**Trabajo adicional (01/04/2026):**
-- `05-gc-product_enrichment_regex-2026_04_01.ipynb` - Extraccion de atributos con regex
-- `06-gc-customer_product_profile-2026_04_01.ipynb` - Perfiles de cliente por preferencias de producto
+**Archivos generados:**
+- `data/04_feature/productos_enriquecidos_regex.parquet` - 3,877 productos con 58 columnas
+- `data/04_feature/rfm_clientes_enriched.parquet` - RFM + preferencias de producto por cliente
+- `data/08_reporting/*.png` - 14 graficos (10 EDA + 4 enriquecimiento)
 
 ## Notebooks y analisis
 

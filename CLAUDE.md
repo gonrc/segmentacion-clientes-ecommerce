@@ -39,12 +39,12 @@ Análisis de comportamiento de clientes y ventas en e-commerce usando el dataset
 - Correlación alta entre Frequency y Monetary (~0.7)
 - Cancel_rate aporta información nueva (baja correlación con RFM)
 
-**Campo Description (Exploración 25/03/2026):**
-- 3,877 productos únicos con información latente extraíble
-- 26.46% tienen color explícito, 18.72% material, 10.53% tamaño
-- 8 categorías implícitas detectadas (Bags, Kitchen, Decoration, Garden, etc.)
-- 48.79% requieren inferencia semántica con LLM (no tienen atributos explícitos)
-- Potencial de enriquecimiento: +15 atributos nuevos por producto
+**Enriquecimiento de Productos (Post-Feedback Entrega 01):**
+- 3,877 productos únicos enriquecidos con regex (01/04/2026)
+- 34.20% tienen color extraído, 15.73% material, 8.38% tamaño, 13.54% estilo
+- 59.68% de productos tienen al menos 1 atributo detectado
+- 40.21% requieren inferencia semántica con LLM (Fase 2, pendiente)
+- +50 atributos nuevos por producto (flags binarios + listas + métricas)
 
 ## Entregas del Trabajo Práctico
 
@@ -60,28 +60,31 @@ Los profesores señalaron que el dataset tiene pocas variables (solo 8 columnas)
 - Generar análisis más profundo sobre comportamiento de compra por tipo de producto
 
 **Acción tomada:**
-Se realizó exploración exhaustiva del campo `Description` (25/03/2026) identificando oportunidades de enriquecimiento. Ver sección "Enriquecimiento del Campo Description" para detalles.
+✅ **COMPLETADA (01/04/2026):** Implementación de enriquecimiento con regex (Fase 1). Ver sección "Enriquecimiento del Campo Description" para detalles.
 
 ### Entrega 02 - Recopilación y Preparación de Datos (28/04/2026)
-**Estado:** ✅ COMPLETADA (24/03/2026)
-**Commit:** `b0264f6` - "Entrega 02: Agregar justificación del dataset y reflexión final completa"
+**Estado:** ✅ COMPLETADA (actualizada 03/04/2026 con enriquecimiento)
+**Commit inicial:** `b0264f6` - "Entrega 02: Agregar justificación del dataset y reflexión final completa"
+**Commit enriquecimiento:** `b372c48` - "Feat: Enriquecimiento de dataset con regex y perfiles de cliente"
 **Formato:** Enlace a repositorio GitHub
 **Presentación:** 29/04/2026
 
 **Notebooks entregados:**
 - `notebooks/1-data/01-gc-carga_y_limpieza-2026_03_18.ipynb` - Con justificación del dataset
-- `notebooks/2-exploration/02-gc-eda_ventas-2026_03_18.ipynb` - EDA completo con 10 visualizaciones
+- `notebooks/2-exploration/02-gc-eda_ventas-2026_03_18.ipynb` - EDA completo con 14 visualizaciones (10 originales + 4 de enriquecimiento)
 - `notebooks/4-feat_eng/04-gc-rfm_por_cliente-2026_03_18.ipynb` - RFM + Reflexión final completa
+- `notebooks/4-feat_eng/05-gc-product_enrichment_regex-2026_04_01.ipynb` - Enriquecimiento con regex + visualizaciones
 
 **Contenido completado:**
 - ✅ Adquisición del dataset Online Retail.xlsx (23 MB descargado)
 - ✅ Justificación formal de elección del dataset (6 razones)
-- ✅ Análisis exploratorio (10 gráficos PNG generados)
+- ✅ Análisis exploratorio (14 gráficos PNG generados)
 - ✅ Limpieza y transformación (397,884 registros válidos)
 - ✅ Diagnóstico de calidad (CustomerID nulos 24.9%, cancelaciones, outliers)
 - ✅ Feature engineering RFM con Monetary neteado
+- ✅ **Enriquecimiento de productos con regex (+50 atributos por producto)**
 - ✅ Reflexión final (decisiones, dificultades, siguientes pasos)
-- ✅ Preparación para modelado (tabla RFM de 4,338 clientes)
+- ✅ Preparación para modelado (tabla RFM de 4,338 clientes + productos enriquecidos)
 
 **Archivos generados:**
 - `data/01_raw/Online Retail.xlsx` (23 MB)
@@ -89,7 +92,9 @@ Se realizó exploración exhaustiva del campo `Description` (25/03/2026) identif
 - `data/03_primary/cancelaciones.parquet` (163 KB, 8,905 registros)
 - `data/04_feature/rfm_clientes.parquet` (73 KB, 4,338 clientes)
 - `data/04_feature/rfm_clientes_detalle.parquet` (113 KB)
-- `data/08_reporting/*.png` (10 visualizaciones)
+- `data/04_feature/productos_enriquecidos_regex.parquet` (108 KB, 3,877 productos con 58 columnas)
+- `data/04_feature/rfm_clientes_enriched.parquet` (160 KB, con preferencias de producto)
+- `data/08_reporting/*.png` (14 visualizaciones: 10 EDA + 4 enriquecimiento)
 
 **Verificación:** Ver `notebooks/ENTREGA02_CUMPLIMIENTO.md` para cumplimiento 100% con PDF de consigna
 
@@ -421,14 +426,18 @@ Tras el feedback de los profesores (25/03/2026) sobre la limitación de variable
 9. Categoría de precio (low/mid/high) por segmento
 10. Seasonal_flag (boolean: es producto estacional?)
 
-### Estrategia de Enriquecimiento (Pendiente Implementación)
+### Estrategia de Enriquecimiento
 
-#### Fase 1: Feature Engineering Manual (1-2 horas)
-1. Extraer color, material, tamaño, estilo, cantidad con regex
-2. Crear flags binarios: `has_color`, `has_material`, `is_set`, etc.
-3. Documentar cobertura y limitaciones
+#### Fase 1: Feature Engineering Manual ✅ COMPLETADA (01/04/2026)
+1. ✅ Extracción de color, material, tamaño, estilo, cantidad con regex
+2. ✅ Flags binarios creados: `has_color`, `has_material`, `is_set`, etc.
+3. ✅ Cobertura documentada y validada
+4. ✅ 4 gráficos de visualización generados
 
-**Output esperado:** ~40% del dataset enriquecido con atributos básicos
+**Output obtenido:** 
+- 59.68% del dataset enriquecido con atributos básicos (superó expectativa del 40%)
+- 3,877 productos con 58 columnas (50 nuevas columnas generadas)
+- Archivo: `data/04_feature/productos_enriquecidos_regex.parquet` (108 KB)
 
 #### Fase 2: Enriquecimiento con LLM (2-3 horas)
 1. Exportar las 3,877 descripciones únicas
@@ -481,11 +490,15 @@ Tras el feedback de los profesores (25/03/2026) sobre la limitación de variable
 
 **Recomendación:** Filtrar o etiquetar como "No-Product" para análisis de productos reales.
 
-### Archivos Pendientes de Generación
+### Archivos Generados (Enriquecimiento Fase 1)
 
-- `notebooks/4-feat_eng/05-gc-product_enrichment-2026_03_25.ipynb` - Notebook de enriquecimiento
-- `data/04_feature/productos_enriquecidos.parquet` - Tabla de atributos por producto
-- `data/04_feature/productos_enriquecidos_detalle.parquet` - Versión extendida con metadatos
+- ✅ `notebooks/4-feat_eng/05-gc-product_enrichment_regex-2026_04_01.ipynb` - Notebook de enriquecimiento con regex
+- ✅ `data/04_feature/productos_enriquecidos_regex.parquet` - 3,877 productos con 58 columnas
+- ✅ `data/04_feature/rfm_clientes_enriched.parquet` - RFM + preferencias de producto por cliente
+- ✅ `data/08_reporting/product_attributes_coverage.png` - Cobertura de atributos
+- ✅ `data/08_reporting/product_attributes_distribution.png` - Distribución de n_attributes
+- ✅ `data/08_reporting/top_colors_frequency.png` - Top 10 colores
+- ✅ `data/08_reporting/top_materials_frequency.png` - Top 10 materiales
 
 ---
 
@@ -523,19 +536,22 @@ Tras el feedback de los profesores (25/03/2026) sobre la limitación de variable
 
 ## Decisiones Técnicas Clave (Post-Feedback Entrega 01)
 
-### 7. Enriquecimiento del Campo Description con NLP/LLM
+### 7. Enriquecimiento del Campo Description con Regex (Fase 1)
 **Decisión:** Implementar pipeline híbrido (regex + LLM) para extraer atributos de productos
 **Justificación:** Feedback de profesores señaló limitación de variables (solo 8 columnas). El campo `Description` contiene información latente estructurable que puede enriquecer el análisis significativamente.
-**Impacto esperado:**
-- +15 atributos nuevos por producto (color, material, tamaño, categoría 3 niveles, función, ocasión, forma)
-- Permite segmentación avanzada por afinidad de producto (no solo RFM)
-- Habilita análisis de market basket, estacionalidad por categoría, CLV segmentado
-**Enfoque técnico:**
-- Fase 1: Regex para atributos explícitos (26-40% cobertura)
-- Fase 2: Claude API para inferencia semántica (48.79% de productos restantes)
-- Fase 3: Join con dataset principal para análisis enriquecido
-**Costo/Tiempo:** ~$3.28 en API calls, 2-3 horas de procesamiento, 1 semana de implementación total
-**Estado:** ⏳ Pendiente (exploración completada 25/03/2026)
+**Impacto real (Fase 1 completada):**
+- +50 atributos nuevos por producto (flags binarios, listas, métricas)
+- 59.68% de productos enriquecidos con al menos 1 atributo
+- Dataset preparado para segmentación avanzada por afinidad de producto
+**Enfoque técnico implementado:**
+- ✅ Fase 1 (01/04/2026): Regex para atributos explícitos (59.68% cobertura, superó expectativa)
+  - 15 colores, 13 materiales, 6 tamaños, 9 estilos detectados
+  - Identificación de sets/packs con cantidad
+  - 4 visualizaciones generadas
+- ⏳ Fase 2 (pendiente): Claude API para inferencia semántica (40.21% de productos restantes)
+- ⏳ Fase 3 (pendiente): Análisis enriquecido con features combinados
+**Costo/Tiempo Fase 1:** 0 costo (regex), ~2 horas de implementación
+**Estado:** ✅ Fase 1 completada (01/04/2026) | ⏳ Fase 2-3 pendientes para Entrega 03
 
 ## Archivos de Referencia
 
@@ -633,13 +649,16 @@ def execute_notebook(notebook_path):
 
 ## Notas para Claude
 
-### Estado Actual del Proyecto (25/03/2026)
+### Estado Actual del Proyecto (03/04/2026)
 - ✅ **Entrega 01:** Completada (propuesta presentada 25/03/2026)
-- ✅ **Entrega 02:** Completada y subida a GitHub (commit `b0264f6`)
-- 🔄 **Feedback post-Entrega 01:** Enriquecer dataset usando campo Description (25/03/2026)
-- 🔄 **Exploración Description:** Completada - identificados 15 atributos extraíbles (25/03/2026)
+- ✅ **Entrega 02:** Completada y actualizada con enriquecimiento (commits `b0264f6` + `b372c48`)
+- ✅ **Feedback post-Entrega 01:** Enriquecer dataset - Fase 1 completada con regex (01/04/2026)
+- ✅ **Enriquecimiento Fase 1:** Completado - 3,877 productos con 58 columnas (+50 nuevas)
+- ✅ **Visualizaciones:** 14 gráficos totales (10 EDA + 4 enriquecimiento)
+- 📅 **Presentación Entrega 02:** 29/04/2026 (en 26 días)
 - ⏳ **Entrega 03:** Pendiente (fecha límite: 23/06/2026)
-  - PRIORIDAD: Implementar pipeline de enriquecimiento de productos
+  - PRÓXIMO: Fase 2 enriquecimiento con LLM (opcional, 40% restante)
+  - PRIORIDAD: Clustering y modelado con features enriquecidos
 
 ### Entorno de Desarrollo
 - Python 3.11.9 vía pyenv (con warnings de hashlib que pueden ignorarse)
@@ -673,20 +692,26 @@ def execute_notebook(notebook_path):
 - Justificación del dataset en notebook 01, celda 2
 - Reflexión final completa en notebook 04, última celda
 
-### Archivos Pendientes para Entrega 03 (Post-Feedback)
-- `notebooks/4-feat_eng/05-gc-product_enrichment-2026_03_25.ipynb` - Pipeline de enriquecimiento
-- `data/04_feature/productos_enriquecidos.parquet` - Tabla con 15 atributos nuevos por producto
-- `notebooks/5-models/06-gc-clustering_rfm_product-2026_XX_XX.ipynb` - Clustering con features enriquecidos
-- `notebooks/6-interpretation/07-gc-analisis_segmentos-2026_XX_XX.ipynb` - Interpretación de segmentos
-- `notebooks/7-deploy/08-gc-streamlit_app-2026_XX_XX.ipynb` - Prototipo interactivo
+### Archivos para Entrega 03
+
+**Completados:**
+- ✅ `notebooks/4-feat_eng/05-gc-product_enrichment_regex-2026_04_01.ipynb` - Enriquecimiento Fase 1 con regex
+- ✅ `data/04_feature/productos_enriquecidos_regex.parquet` - 3,877 productos con 58 columnas
+- ✅ `data/04_feature/rfm_clientes_enriched.parquet` - RFM + preferencias de producto
+
+**Pendientes:**
+- ⏳ `notebooks/4-feat_eng/06-gc-product_enrichment_llm-2026_XX_XX.ipynb` - Enriquecimiento Fase 2 con LLM (opcional)
+- ⏳ `notebooks/5-models/07-gc-clustering_rfm_product-2026_XX_XX.ipynb` - Clustering con features enriquecidos
+- ⏳ `notebooks/6-interpretation/08-gc-analisis_segmentos-2026_XX_XX.ipynb` - Interpretación de segmentos
+- ⏳ `notebooks/7-deploy/09-gc-streamlit_app-2026_XX_XX.ipynb` - Prototipo interactivo
 
 ### Próximos Pasos (Entrega 03)
 
-**PRIORIDAD 1: Enriquecimiento del Dataset (1-2 semanas)**
-1. Implementar extracción de atributos con regex (color, material, tamaño, estilo)
-2. Procesar 3,877 productos únicos con Claude API para categorización semántica
-3. Generar tabla `productos_enriquecidos.parquet` con 15 nuevos atributos
-4. Join con dataset principal y validación de calidad
+**PRIORIDAD 1: Enriquecimiento del Dataset ✅ COMPLETADA (Fase 1)**
+1. ✅ Implementar extracción de atributos con regex (color, material, tamaño, estilo) - 01/04/2026
+2. ⏳ Procesar 3,877 productos únicos con Claude API para categorización semántica (OPCIONAL - Fase 2)
+3. ✅ Generar tabla `productos_enriquecidos_regex.parquet` con 50 nuevos atributos
+4. ✅ Join con dataset principal y validación de calidad (rfm_clientes_enriched.parquet)
 
 **PRIORIDAD 2: Feature Engineering Avanzado**
 5. Estandarización de variables RFM (StandardScaler)

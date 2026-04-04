@@ -56,6 +56,16 @@ Descarga directa: [online+retail.zip](https://archive.ics.uci.edu/static/public/
 - [Python](https://www.python.org/) >= 3.11
 - [Make](https://www.gnu.org/software/make/) (opcional)
 
+### Extensiones recomendadas (VS Code / Cursor)
+
+Para visualizar los archivos `.parquet` generados por los notebooks directamente desde el editor, instalar la extension [Parquet Visualizer](https://marketplace.cursorapi.com/items/?itemName=lucien-martijn.parquet-visualizer):
+
+```
+ext install lucien-martijn.parquet-visualizer
+```
+
+Las demas extensiones recomendadas del proyecto se instalan automaticamente al abrir el repositorio (ver `.vscode/extensions.json`).
+
 ### Instalacion
 
 ```bash

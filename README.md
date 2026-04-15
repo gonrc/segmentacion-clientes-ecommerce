@@ -89,7 +89,7 @@ python3 -m venv .venv
 source .venv/bin/activate  # En Windows: .venv\Scripts\activate
 
 # Instalar dependencias
-pip install pandas openpyxl pyarrow matplotlib seaborn jupyter nbconvert scikit-learn
+pip install pandas openpyxl pyarrow matplotlib seaborn jupyter nbconvert scikit-learn scipy
 ```
 
 ### Agregar el dataset

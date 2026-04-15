@@ -43,11 +43,10 @@ RAZONES:
   2. 64.7% de revenue capturado con atributos explícitos
   3. Flags binarios tienen alto poder discriminatorio para segmentación
   4. Los productos sin atributos son más difusos (no tienen patrones claros)
-  5. Tiempo/costo de LLM no justificado para 35% adicional de revenue
+  5. Productos sin atributos son más difusos (no tienen patrones claros)
 
 ALTERNATIVAS CONSIDERADAS:
   ❌ Agregar más keywords regex → Rendimientos decrecientes (palabras muy específicas)
-  ❌ LLM completo (1,559 productos) → $3.28, 2-3 horas, solo 35% adicional
   ✅ Proceder con RFM + Atributos regex para clustering
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

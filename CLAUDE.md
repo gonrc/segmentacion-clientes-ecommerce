@@ -43,7 +43,6 @@ Análisis de comportamiento de clientes y ventas en e-commerce usando el dataset
 - 3,877 productos únicos enriquecidos con regex (01/04/2026)
 - 34.20% tienen color extraído, 15.73% material, 8.38% tamaño, 13.54% estilo
 - 59.68% de productos tienen al menos 1 atributo detectado
-- 40.21% requieren inferencia semántica con LLM (Fase 2, pendiente)
 - +50 atributos nuevos por producto (flags binarios + listas + métricas)
 
 ## Entregas del Trabajo Práctico
@@ -56,7 +55,6 @@ Análisis de comportamiento de clientes y ventas en e-commerce usando el dataset
 **Feedback recibido (25/03/2026):**
 Los profesores señalaron que el dataset tiene pocas variables (solo 8 columnas), lo cual limita el análisis. Sugirieron enriquecer el dataset usando el campo `Description` del producto para:
 - Extraer atributos adicionales (categorías, materiales, colores, tamaños)
-- Usar técnicas de NLP/LLM para categorización semántica
 - Generar análisis más profundo sobre comportamiento de compra por tipo de producto
 
 **Acción tomada:**
@@ -154,16 +152,15 @@ segmentacion-clientes-ecommerce/
 **Variables originales:**
 - InvoiceNo: Número de factura
 - StockCode: Código de producto
-- Description: Descripción del producto ⚡ *Campo a enriquecir con NLP/LLM*
+- Description: Descripción del producto (enriquecido con regex)
 - Quantity: Cantidad vendida
 - InvoiceDate: Fecha de transacción
 - UnitPrice: Precio unitario
 - CustomerID: ID del cliente
 - Country: País del cliente
 
-**Variables derivadas planificadas (post-enriquecimiento):**
+**Variables derivadas (post-enriquecimiento con regex):**
 - Color, Material, Tamaño, Estilo (extracción regex)
-- Categoría (3 niveles), Función, Ocasión, Forma (inferencia LLM)
 - Complejidad, PrecioUnitarioReal, DensidadInfo, Seasonal_flag (calculados)
 
 **Características:**
@@ -215,7 +212,7 @@ make install_data_libs        # Instala librerías de data science
 cd segmentacion-clientes-ecommerce
 python3 -m venv .venv
 source .venv/bin/activate
-pip install pandas openpyxl pyarrow matplotlib seaborn jupyter nbconvert
+pip install pandas openpyxl pyarrow matplotlib seaborn jupyter nbconvert scipy
 ```
 
 ### Instalación de Dependencias
@@ -328,8 +325,7 @@ Basado en **CRISP-DM** (Cross-Industry Standard Process for Data Mining):
 
 ### Feature Engineering
 - **RFM Analysis:** Recency, Frequency, Monetary value
-- **Product Attributes:** Color, Material, Tamaño, Estilo/Tema, Categoría jerárquica (3 niveles)
-- **Product Behavior:** Función (decorative/functional/gift), Ocasión (Christmas/party/kids), Forma
+- **Product Attributes:** Color, Material, Tamaño, Estilo/Tema (extracción regex)
 - **Derived Features:** Lifetime value, Cancel_rate, Seasonal_flag, Complejidad (single/set), PrecioUnitarioReal
 
 ## Consideraciones Especiales
@@ -407,24 +403,13 @@ Tras el feedback de los profesores (25/03/2026) sobre la limitación de variable
 | CHILDREN | 15,247 | 3.83% |
 | CLOTHING/TEXTILE | 9,498 | 2.39% |
 
-### Features Extraíbles con LLM (Inferencia Semántica)
+### Features Derivados (Post-procesamiento)
 
-**Necesidad:** 48.79% de registros (194,121) NO tienen atributos explícitos detectables con regex
-
-**Features secundarios (requieren LLM):**
-1. **Categoría jerárquica** (3 niveles): Macro > Categoría > Subcategoría
-   - Ejemplo: Home > Kitchen > Drinkware
-2. **Función/Uso**: decorative, functional, gift, seasonal
-3. **Ocasión/Target**: Christmas, party, kids, garden, wedding
-4. **Forma/Shape**: heart, star, round, square, animal
-5. **Características especiales**: vintage, handmade, set, collectible
-
-**Features derivados (post-procesamiento):**
-6. Complejidad del producto (single/set/bundle)
-7. Precio por unidad real (UnitPrice / cantidad_en_set)
-8. Densidad de información (atributos_explícitos / palabras)
-9. Categoría de precio (low/mid/high) por segmento
-10. Seasonal_flag (boolean: es producto estacional?)
+1. Complejidad del producto (single/set/bundle)
+2. Precio por unidad real (UnitPrice / cantidad_en_set)
+3. Densidad de información (atributos_explícitos / palabras)
+4. Categoría de precio (low/mid/high) por segmento
+5. Seasonal_flag (boolean: es producto estacional?)
 
 ### Estrategia de Enriquecimiento
 
@@ -439,22 +424,7 @@ Tras el feedback de los profesores (25/03/2026) sobre la limitación de variable
 - 3,877 productos con 58 columnas (50 nuevas columnas generadas)
 - Archivo: `data/04_feature/productos_enriquecidos_regex.parquet` (108 KB)
 
-#### Fase 2: Enriquecimiento con LLM (2-3 horas)
-1. Exportar las 3,877 descripciones únicas
-2. Procesar con Claude API en batches de 100-200 productos
-3. Extraer: categoría jerárquica, función, ocasión, forma
-4. Generar `data/04_feature/productos_enriquecidos.parquet`
-5. Join con dataset principal
-
-**Estimación de esfuerzo:**
-- 39 batches de 100 productos
-- ~117K tokens input + ~195K tokens output
-- Costo estimado: ~$3.28 (Claude Sonnet 4.5)
-- Tiempo: 2-3 horas (incluyendo rate limits y QA)
-
-**Output esperado:** Tabla de mapping con 15 atributos nuevos por producto
-
-#### Fase 3: Análisis Enriquecido
+#### Fase 2: Análisis Enriquecido
 1. RFM + Product Affinity segmentation
 2. Análisis de categorías de producto × comportamiento de cliente
 3. Market basket analysis
@@ -536,22 +506,20 @@ Tras el feedback de los profesores (25/03/2026) sobre la limitación de variable
 
 ## Decisiones Técnicas Clave (Post-Feedback Entrega 01)
 
-### 7. Enriquecimiento del Campo Description con Regex (Fase 1)
-**Decisión:** Implementar pipeline híbrido (regex + LLM) para extraer atributos de productos
+### 7. Enriquecimiento del Campo Description con Regex
+**Decisión:** Implementar pipeline de regex para extraer atributos de productos
 **Justificación:** Feedback de profesores señaló limitación de variables (solo 8 columnas). El campo `Description` contiene información latente estructurable que puede enriquecer el análisis significativamente.
 **Impacto real (Fase 1 completada):**
 - +50 atributos nuevos por producto (flags binarios, listas, métricas)
 - 59.68% de productos enriquecidos con al menos 1 atributo
 - Dataset preparado para segmentación avanzada por afinidad de producto
 **Enfoque técnico implementado:**
-- ✅ Fase 1 (01/04/2026): Regex para atributos explícitos (59.68% cobertura, superó expectativa)
+- ✅ Regex para atributos explícitos (59.68% cobertura, superó expectativa)
   - 15 colores, 13 materiales, 6 tamaños, 9 estilos detectados
   - Identificación de sets/packs con cantidad
   - 4 visualizaciones generadas
-- ⏳ Fase 2 (pendiente): Claude API para inferencia semántica (40.21% de productos restantes)
-- ⏳ Fase 3 (pendiente): Análisis enriquecido con features combinados
-**Costo/Tiempo Fase 1:** 0 costo (regex), ~2 horas de implementación
-**Estado:** ✅ Fase 1 completada (01/04/2026) | ⏳ Fase 2-3 pendientes para Entrega 03
+**Costo/Tiempo:** 0 costo (regex), ~2 horas de implementación
+**Estado:** ✅ Completado (01/04/2026)
 
 ## Archivos de Referencia
 
@@ -657,7 +625,6 @@ def execute_notebook(notebook_path):
 - ✅ **Visualizaciones:** 14 gráficos totales (10 EDA + 4 enriquecimiento)
 - 📅 **Presentación Entrega 02:** 29/04/2026 (en 26 días)
 - ⏳ **Entrega 03:** Pendiente (fecha límite: 23/06/2026)
-  - PRÓXIMO: Fase 2 enriquecimiento con LLM (opcional, 40% restante)
   - PRIORIDAD: Clustering y modelado con features enriquecidos
 
 ### Entorno de Desarrollo
@@ -700,7 +667,6 @@ def execute_notebook(notebook_path):
 - ✅ `data/04_feature/rfm_clientes_enriched.parquet` - RFM + preferencias de producto
 
 **Pendientes:**
-- ⏳ `notebooks/4-feat_eng/06-gc-product_enrichment_llm-2026_XX_XX.ipynb` - Enriquecimiento Fase 2 con LLM (opcional)
 - ⏳ `notebooks/5-models/07-gc-clustering_rfm_product-2026_XX_XX.ipynb` - Clustering con features enriquecidos
 - ⏳ `notebooks/6-interpretation/08-gc-analisis_segmentos-2026_XX_XX.ipynb` - Interpretación de segmentos
 - ⏳ `notebooks/7-deploy/09-gc-streamlit_app-2026_XX_XX.ipynb` - Prototipo interactivo
@@ -709,8 +675,7 @@ def execute_notebook(notebook_path):
 
 **PRIORIDAD 1: Enriquecimiento del Dataset ✅ COMPLETADA (Fase 1)**
 1. ✅ Implementar extracción de atributos con regex (color, material, tamaño, estilo) - 01/04/2026
-2. ⏳ Procesar 3,877 productos únicos con Claude API para categorización semántica (OPCIONAL - Fase 2)
-3. ✅ Generar tabla `productos_enriquecidos_regex.parquet` con 50 nuevos atributos
+2. ✅ Generar tabla `productos_enriquecidos_regex.parquet` con 50 nuevos atributos
 4. ✅ Join con dataset principal y validación de calidad (rfm_clientes_enriched.parquet)
 
 **PRIORIDAD 2: Feature Engineering Avanzado**

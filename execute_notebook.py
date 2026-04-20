@@ -10,8 +10,10 @@ from pathlib import Path
 import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
 
+MIN_REQUIRED_ARGS = 2
 
-def execute_notebook(notebook_path):
+
+def execute_notebook(notebook_path: str | Path) -> None:
     """Ejecuta un notebook y guarda el resultado con outputs."""
     notebook_path = Path(notebook_path)
 
@@ -40,7 +42,7 @@ def execute_notebook(notebook_path):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    if len(sys.argv) < MIN_REQUIRED_ARGS:
         print("Uso: python execute_notebook.py <ruta_al_notebook>")
         sys.exit(1)
 

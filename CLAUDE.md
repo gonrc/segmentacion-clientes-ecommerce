@@ -97,6 +97,14 @@ Los profesores señalaron que el dataset tiene pocas variables (solo 8 columnas)
 **Verificación:** Ver `notebooks/ENTREGA02_CUMPLIMIENTO.md` para cumplimiento 100% con PDF de consigna
 
 ### Entrega 03 - Modelado y Presentación (23/06/2026)
+**Estado:** 🚧 EN PROGRESO
+**Avance local validado (19/04/2026):**
+- ✅ Notebook de clustering ejecutado: `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb`
+- ✅ Notebook de churn ejecutado: `notebooks/5-models/08-gc-churn-2026_04_16.ipynb`
+- ✅ Notebook de interpretación ejecutado: `notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb`
+- ✅ Modelos serializados: `data/06_models/kmeans_model.pkl`, `data/06_models/churn_model.pkl`
+- ✅ Outputs generados: `data/07_model_output/clientes_segmentados.parquet`, `data/07_model_output/churn_predictions.parquet`
+
 **Contenido esperado:**
 - Implementación de modelos (predictivos/descriptivos/clustering)
 - Validación con métricas apropiadas
@@ -617,15 +625,16 @@ def execute_notebook(notebook_path):
 
 ## Notas para Claude
 
-### Estado Actual del Proyecto (03/04/2026)
+### Estado Actual del Proyecto (19/04/2026)
 - ✅ **Entrega 01:** Completada (propuesta presentada 25/03/2026)
 - ✅ **Entrega 02:** Completada y actualizada con enriquecimiento (commits `b0264f6` + `b372c48`)
 - ✅ **Feedback post-Entrega 01:** Enriquecer dataset - Fase 1 completada con regex (01/04/2026)
 - ✅ **Enriquecimiento Fase 1:** Completado - 3,877 productos con 58 columnas (+50 nuevas)
 - ✅ **Visualizaciones:** 14 gráficos totales (10 EDA + 4 enriquecimiento)
 - 📅 **Presentación Entrega 02:** 29/04/2026 (en 26 días)
-- ⏳ **Entrega 03:** Pendiente (fecha límite: 23/06/2026)
-  - PRIORIDAD: Clustering y modelado con features enriquecidos
+- 🚧 **Entrega 03:** En progreso (fecha límite: 23/06/2026)
+  - Modelos locales ya generados: clustering K-Means + churn
+  - Próxima prioridad: consolidar narrativa, despliegue y presentación
 
 ### Entorno de Desarrollo
 - Python 3.11.9 vía pyenv (con warnings de hashlib que pueden ignorarse)
@@ -665,10 +674,16 @@ def execute_notebook(notebook_path):
 - ✅ `notebooks/4-feat_eng/05-gc-product_enrichment_regex-2026_04_01.ipynb` - Enriquecimiento Fase 1 con regex
 - ✅ `data/04_feature/productos_enriquecidos_regex.parquet` - 3,877 productos con 58 columnas
 - ✅ `data/04_feature/rfm_clientes_enriched.parquet` - RFM + preferencias de producto
+- ✅ `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb` - Clustering K-Means con features enriquecidos
+- ✅ `notebooks/5-models/08-gc-churn-2026_04_16.ipynb` - Modelo supervisado de churn
+- ✅ `notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb` - Interpretación de segmentos y dashboard
+- ✅ `data/05_model_input/churn_dataset.parquet` - Dataset para entrenamiento de churn
+- ✅ `data/06_models/kmeans_model.pkl` - Modelo de clustering serializado
+- ✅ `data/06_models/churn_model.pkl` - Modelo de churn serializado
+- ✅ `data/07_model_output/clientes_segmentados.parquet` - Clientes segmentados
+- ✅ `data/07_model_output/churn_predictions.parquet` - Predicciones de churn
 
 **Pendientes:**
-- ⏳ `notebooks/5-models/07-gc-clustering_rfm_product-2026_XX_XX.ipynb` - Clustering con features enriquecidos
-- ⏳ `notebooks/6-interpretation/08-gc-analisis_segmentos-2026_XX_XX.ipynb` - Interpretación de segmentos
 - ⏳ `notebooks/7-deploy/09-gc-streamlit_app-2026_XX_XX.ipynb` - Prototipo interactivo
 
 ### Próximos Pasos (Entrega 03)
@@ -685,14 +700,14 @@ def execute_notebook(notebook_path):
 8. CLV estimado por segmento de producto
 
 **PRIORIDAD 3: Modelado y Segmentación**
-9. Clustering K-Means con features enriquecidos (determinar k óptimo con elbow + silueta)
-10. Segmentación RFM + Product Affinity
-11. Interpretación de segmentos (perfiles, etiquetas de negocio)
-12. Validación con cohortes
+9. ✅ Clustering K-Means con features enriquecidos (ejecutado y serializado)
+10. ✅ Segmentación RFM + Product Affinity
+11. ✅ Interpretación de segmentos (perfiles, etiquetas de negocio)
+12. ✅ Predicciones de churn generadas y guardadas localmente
 
 **PRIORIDAD 4: Despliegue y Presentación**
 13. Prototipo Streamlit/Flask con segmentación interactiva
-14. Dashboard de análisis de producto
+14. Integrar modelos locales en dashboard o demo
 15. Documentación final y narrativa
 16. Presentación oral (10-15 min): enfatizar enriquecimiento de datos como respuesta al feedback
 

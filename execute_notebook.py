@@ -3,10 +3,12 @@
 Script para ejecutar notebooks de Jupyter programaticamente.
 Uso: python execute_notebook.py <ruta_al_notebook>
 """
+
 import sys
+from pathlib import Path
+
 import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
-from pathlib import Path
 
 
 def execute_notebook(notebook_path):
@@ -22,16 +24,16 @@ def execute_notebook(notebook_path):
     with open(notebook_path) as f:
         nb = nbformat.read(f, as_version=4)
 
-    ep = ExecutePreprocessor(timeout=600, kernel_name='python3')
+    ep = ExecutePreprocessor(timeout=600, startup_timeout=300, kernel_name="python3")
 
     try:
-        ep.preprocess(nb, {'metadata': {'path': str(notebook_path.parent.resolve())}})
-        print(f"✓ Notebook ejecutado exitosamente")
+        ep.preprocess(nb, {"metadata": {"path": str(notebook_path.parent.resolve())}})
+        print("✓ Notebook ejecutado exitosamente")
     except Exception as e:
         print(f"✗ Error al ejecutar notebook: {e}")
         sys.exit(1)
 
-    with open(notebook_path, 'w', encoding='utf-8') as f:
+    with open(notebook_path, "w", encoding="utf-8") as f:
         nbformat.write(nb, f)
 
     print(f"✓ Notebook guardado con outputs: {notebook_path}")

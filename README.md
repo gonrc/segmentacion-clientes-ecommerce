@@ -5,7 +5,7 @@
 
 **Trabajo Practico - Ciencia de Datos Aplicada | ITBA | 1er Cuatrimestre 2026 | Grupo 12**
 
-> **Estado actual (03/04/2026):** ✅ Entrega 02 completada con enriquecimiento | ✅ Dataset enriquecido (+50 atributos/producto) | ⏳ Entrega 03 pendiente
+> **Estado actual (19/04/2026):** ✅ Entrega 02 completada con enriquecimiento | ✅ Dataset enriquecido (+50 atributos/producto) | ✅ Modelos locales generados (`kmeans_model.pkl`, `churn_model.pkl`) | ⏳ Entrega 03 en progreso
 
 ---
 
@@ -144,7 +144,7 @@ O descargar manualmente desde [UCI](https://archive.ics.uci.edu/dataset/352/onli
 | **1ra** | 24/03/2026 | ✅ Completada (25/03/2026) | Propuesta de proyecto: problema, objetivos, datos, viabilidad |
 | **2da** | 28/04/2026 | ✅ Completada (actualizada 03/04/2026) | Recopilacion y preparacion de datos: limpieza, EDA, features RFM + enriquecimiento |
 | **Post-feedback** | - | ✅ Completada (01/04/2026) | Enriquecimiento Fase 1: +50 atributos/producto con regex (colores, materiales, estilos, tamaños) |
-| **3ra** | 23/06/2026 | ⏳ Pendiente | Clustering con features enriquecidos, segmentacion avanzada, prototipo y presentacion |
+| **3ra** | 23/06/2026 | 🚧 En progreso | Clustering con features enriquecidos, modelo de churn, interpretacion de segmentos, prototipo y presentacion |
 
 ### Notebooks entregados
 
@@ -159,6 +159,16 @@ O descargar manualmente desde [UCI](https://archive.ics.uci.edu/dataset/352/onli
 - `data/04_feature/rfm_clientes_enriched.parquet` - RFM + preferencias de producto por cliente
 - `data/08_reporting/*.png` - 14 graficos (10 EDA + 4 enriquecimiento)
 
+**Modelado local generado (19/04/2026):**
+- `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb` - Clustering K-Means con features enriquecidos
+- `notebooks/5-models/08-gc-churn-2026_04_16.ipynb` - Modelo supervisado de churn
+- `notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb` - Dashboard e interpretacion de segmentos
+- `data/05_model_input/churn_dataset.parquet` - Dataset listo para entrenamiento de churn
+- `data/06_models/kmeans_model.pkl` - Modelo de clustering serializado
+- `data/06_models/churn_model.pkl` - Modelo de churn serializado
+- `data/07_model_output/clientes_segmentados.parquet` - Segmentos asignados por cliente
+- `data/07_model_output/churn_predictions.parquet` - Predicciones de churn por cliente
+
 ## Notebooks y analisis
 
 ### Ejecutar notebooks
@@ -171,7 +181,7 @@ Los notebooks estan organizados por fase en `notebooks/`:
 - `1-data/` - Carga y limpieza
 - `2-exploration/` - Analisis exploratorio
 - `4-feat_eng/` - Ingenieria de features (RFM, atributos de producto)
-- `5-models/` - Clustering y segmentacion (proximo)
+- `5-models/` - Clustering, churn y evaluacion de modelos
 
 ### Verificacion de cumplimiento
 

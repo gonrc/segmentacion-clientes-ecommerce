@@ -5,7 +5,7 @@
 
 **Trabajo Practico - Ciencia de Datos Aplicada | ITBA | 1er Cuatrimestre 2026 | Grupo 12**
 
-> **Estado actual (03/06/2026):** Entrega 03 implementada en `main` con notebooks reproducibles de modelado (`07`, `08`, `09`) y prototipo funcional en Streamlit.
+> **Estado actual (03/06/2026):** Entregas 01 y 02 finalizadas. Entrega 03 implementada en `main` con notebooks reproducibles de modelado (`07`, `08`, `09`) y prototipo funcional en Streamlit.
 
 ---
 
@@ -22,6 +22,16 @@ Construir una solucion de datos que permita:
 - Segmentar clientes con enfoque RFM + preferencias de producto.
 - Detectar clientes con mayor riesgo de churn.
 - Priorizar acciones de retencion y crecimiento con impacto comercial.
+
+## Resumen por entrega
+
+| Entrega | Estado | Resultado principal |
+|--------|--------|---------------------|
+| Entrega 01 | Completada | Definicion del problema, alcance y dataset base. |
+| Entrega 02 | Completada | Limpieza, EDA, RFM y enriquecimiento de productos via regex. |
+| Entrega 03 | Completada (implementacion) | Modelos de segmentacion + churn, validacion e interfaz funcional en Streamlit. |
+
+Este repositorio refleja la evolucion completa del trabajo practico y queda preparado para iteraciones futuras.
 
 ## Alcance Entrega 03 (actual)
 
@@ -42,6 +52,10 @@ Construir una solucion de datos que permita:
   - Buscador de cliente.
   - Simulador de nuevos clientes con muestreo aleatorio realista.
   - Seccion de propuesta de despliegue.
+
+Vista del prototipo:
+
+![Prototipo Streamlit - simulador de churn y segmento](assets/streamlit-simulador-entrega03.png)
 
 ### Artefactos esperados
 
@@ -104,6 +118,8 @@ Para regenerar artefactos de modelado y reportes:
 .venv/bin/python execute_notebook.py "notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb"
 ```
 
+Si ya existen artefactos previos en `data/`, se recomienda regenerarlos con esta secuencia para asegurar consistencia de resultados.
+
 ---
 
 ## Ejecutar la app Streamlit
@@ -144,6 +160,16 @@ Por defecto queda disponible en `http://127.0.0.1:8501`.
 ├── pyproject.toml
 └── README.md
 ```
+
+## Que revisar primero (docentes)
+
+Para una revision rapida del entregable:
+
+1. `README.md` (este documento).
+2. `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb`.
+3. `notebooks/5-models/08-gc-churn-2026_04_16.ipynb`.
+4. `notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb`.
+5. `notebooks/7-deploy/streamlit_app.py` (prototipo).
 
 ## Nota sobre versionado de datos
 

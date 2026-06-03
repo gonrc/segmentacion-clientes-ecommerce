@@ -98,7 +98,7 @@ def format_money(value: float) -> str:
 
 
 def format_pct(value: float) -> str:
-    return f"{value:.1%}"
+    return f"{value:.2%}"
 
 
 def risk_level(probability: float) -> str:
@@ -202,8 +202,6 @@ def render_sidebar(customer_table: pd.DataFrame) -> None:
     st.sidebar.write("Modelos usados:")
     st.sidebar.write("- K-Means para segmentacion")
     st.sidebar.write("- Random Forest para churn")
-    st.sidebar.markdown("---")
-    st.sidebar.caption("Los artefactos se cargan desde `data/` para que la demo funcione offline.")
 
 
 def render_executive_summary(customer_table: pd.DataFrame) -> None:
@@ -224,9 +222,17 @@ def render_executive_summary(customer_table: pd.DataFrame) -> None:
         "Revenue en riesgo (probabilidad >= 0,40)",
         format_money(float(risk_clients["Monetary"].sum())),
     )
+    st.markdown("### Metodologia en una linea")
+    st.write(
+        "- **Segmentacion (K-Means):** identifica perfiles de clientes para orientar estrategias.\n"
+        "- **Churn (Random Forest):** estima probabilidad de abandono para priorizar retencion."
+    )
     st.info(
         "Lectura ejecutiva: la solucion combina segmentos de negocio con probabilidad de churn "
         "para priorizar acciones comerciales, especialmente en clientes VIP con riesgo elevado."
+    )
+    st.caption(
+        "Nota: el umbral de priorizacion actual es 0.40. Puede ajustarse en la pestana de Churn."
     )
     display_report_image("segment_dashboard", "Dashboard de segmentos")
 
@@ -249,6 +255,9 @@ def render_segments(customer_table: pd.DataFrame) -> None:
     )
     st.subheader("Perfil agregado por segmento")
     st.dataframe(agg, width="stretch")
+    st.caption(
+        "Sugerencia de lectura: priorizar segmentos con mayor revenue y mayor churn_prob promedio."
+    )
 
     st.subheader("Interpretacion comercial")
     cols = st.columns(4)
@@ -303,14 +312,22 @@ def render_churn(customer_table: pd.DataFrame) -> None:
 
     st.subheader("Ranking de clientes en riesgo")
     st.dataframe(ranking, width="stretch", hide_index=True)
+    st.caption(
+        "`churn_prob` es probabilidad estimada; `churn_pred` es la clase final segun el umbral del modelo."
+    )
+    st.caption("Uso recomendado: ranking para priorizacion comercial, no como explicacion causal.")
 
     left, right = st.columns(2)
     with left:
         display_report_image("churn_feature_importance", "Importancia de variables")
-        display_report_image("churn_confusion_matrices", "Matrices de confusion")
     with right:
-        display_report_image("churn_roc_curves", "Curvas ROC")
         display_report_image("churn_by_segment", "Churn por segmento")
+    with st.expander("Ver metricas tecnicas de validacion (detalle)"):
+        c1, c2 = st.columns(2)
+        with c1:
+            display_report_image("churn_confusion_matrices", "Matrices de confusion")
+        with c2:
+            display_report_image("churn_roc_curves", "Curvas ROC")
 
 
 def render_customer_lookup(customer_table: pd.DataFrame) -> None:
@@ -553,30 +570,48 @@ def collect_simulation_inputs(
     st.caption(
         "El cliente random parte de un cliente real y aplica una variacion pequena por variable."
     )
+    st.caption(
+        "Flujo recomendado: 1) generar cliente random, 2) ajustar variables, 3) calcular score."
+    )
     if st.button("Generar cliente random", type="secondary"):
         randomize_simulator_state(stats, anchor_pool, kmeans_bundle, labels)
 
-    col1, col2, col3 = st.columns(3)
     values: dict[str, float] = {}
-    with col1:
-        for field in ["Recency", "Frequency", "Monetary", "Cancel_rate", "avg_order_value"]:
-            values[field] = number_input_for_field(field, stats)
-    with col2:
+    st.markdown("#### RFM y valor")
+    r1, r2, r3 = st.columns(3)
+    with r1:
+        values["Recency"] = number_input_for_field("Recency", stats)
+        values["Frequency"] = number_input_for_field("Frequency", stats)
+    with r2:
+        values["Monetary"] = number_input_for_field("Monetary", stats)
+        values["avg_order_value"] = number_input_for_field("avg_order_value", stats)
+    with r3:
+        values["Cancel_rate"] = number_input_for_field("Cancel_rate", stats)
+
+    st.markdown("#### Afinidad de producto")
+    p1, p2, p3 = st.columns(3)
+    with p1:
         values["pct_with_color"] = number_input_for_field("pct_with_color", stats)
         values["color_diversity"] = number_input_for_field("color_diversity", stats)
+    with p2:
+        values["pct_with_material"] = number_input_for_field("pct_with_material", stats)
+        values["pct_purchases_sets"] = number_input_for_field("pct_purchases_sets", stats)
+    with p3:
         values["is_color_specialist"] = float(
             st.checkbox("is_color_specialist", key=simulator_key("is_color_specialist"))
         )
-        values["pct_with_material"] = number_input_for_field("pct_with_material", stats)
-        values["pct_purchases_sets"] = number_input_for_field("pct_purchases_sets", stats)
-    with col3:
-        for field in [
-            "avg_quantity_in_set",
-            "avg_days_between_purchases",
-            "months_active",
-            "n_products_unique",
-        ]:
-            values[field] = number_input_for_field(field, stats)
+        values["avg_quantity_in_set"] = number_input_for_field("avg_quantity_in_set", stats)
+
+    st.markdown("#### Actividad y recurrencia")
+    a1, a2, a3 = st.columns(3)
+    with a1:
+        values["avg_days_between_purchases"] = number_input_for_field(
+            "avg_days_between_purchases", stats
+        )
+    with a2:
+        values["months_active"] = number_input_for_field("months_active", stats)
+    with a3:
+        values["n_products_unique"] = number_input_for_field("n_products_unique", stats)
     return values
 
 
@@ -667,6 +702,7 @@ def render_deployment() -> None:
         "transacciones, limpieza, generacion de features, scoring de modelos y publicacion en "
         "dashboard interno o CRM."
     )
+    st.caption("Estado actual: MVP local funcional con Streamlit y artefactos precalculados.")
 
     st.subheader("Recursos requeridos")
     st.write(

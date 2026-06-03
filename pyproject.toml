@@ -5,11 +5,11 @@ description = "Segmentacion de clientes y analisis comercial para optimizar deci
 authors = [
     "Grupo 12 - ITBA <grupo12@itba.edu.ar>",
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.14"
 readme = "README.md"
 
 dependencies = [
-    "numpy>=2.4.3",
+    "numpy>=2.0,<2.3",
     "openpyxl>=3.1.5",
     "pandas[parquet]>=3.0.1",
     "scikit-learn>=1.8.0",

@@ -23,7 +23,7 @@
   "files.exclude": {
     "**/__pycache__": true
   },
-  "python.languageServer": "Pylance",
+  "python.languageServer": "None",
   "editor.formatOnPaste": true,
   "notebook.lineNumbers": "on",
   "editor.inlineSuggest.enabled": true,

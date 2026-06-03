@@ -5,188 +5,151 @@
 
 **Trabajo Practico - Ciencia de Datos Aplicada | ITBA | 1er Cuatrimestre 2026 | Grupo 12**
 
-> **Estado actual (19/04/2026):** ✅ Entrega 02 completada con enriquecimiento | ✅ Dataset enriquecido (+50 atributos/producto) | ✅ Modelos locales generados (`kmeans_model.pkl`, `churn_model.pkl`) | ⏳ Entrega 03 en progreso
+> **Estado actual (03/06/2026):** Entrega 03 implementada en `main` con notebooks reproducibles de modelado (`07`, `08`, `09`) y prototipo funcional en Streamlit.
 
 ---
 
 ## Descripcion del proyecto
 
-Proyecto de analitica comercial que utiliza datos transaccionales del dataset [Online Retail](https://archive.ics.uci.edu/dataset/352/online+retail) de UCI para generar conocimiento accionable sobre el comportamiento de clientes y ventas en un e-commerce.
+Proyecto de analitica comercial sobre el dataset [Online Retail](https://archive.ics.uci.edu/dataset/352/online+retail) de UCI para segmentar clientes, estimar riesgo de churn y proponer acciones comerciales accionables.
 
-El dataset contiene **541.909 transacciones** de un retailer online del Reino Unido (periodo: 01/12/2010 - 09/12/2011). La empresa vende regalos y articulos varios, y gran parte de sus clientes son mayoristas.
+El dataset contiene **541.909 transacciones** de un retailer online del Reino Unido (periodo: `2010-12-01` a `2011-12-09`). Luego de limpieza se trabaja con **397.884 transacciones validas**.
 
-## Problema de negocio
+## Objetivo de negocio
 
-La empresa cuenta con datos de transacciones pero no dispone de una vision clara de:
+Construir una solucion de datos que permita:
 
-- Que segmentos de clientes tiene
-- Cuales generan mas ingreso
-- Que patrones de compra se repiten
-- Que senales anticipan cancelaciones o menor valor comercial
+- Segmentar clientes con enfoque RFM + preferencias de producto.
+- Detectar clientes con mayor riesgo de churn.
+- Priorizar acciones de retencion y crecimiento con impacto comercial.
 
-## Objetivos
+## Alcance Entrega 03 (actual)
 
-**Objetivo principal:** Generar conocimiento accionable sobre el comportamiento de clientes y ventas para mejorar la segmentacion comercial y la toma de decisiones.
+### Modelado y validacion
 
-**Subobjetivos:**
+- `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb`
+  - Clustering de clientes (K-Means) con features RFM + atributos enriquecidos.
+- `notebooks/5-models/08-gc-churn-2026_04_16.ipynb`
+  - Modelo supervisado de churn y evaluacion con metricas de clasificacion.
+- `notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb`
+  - Analisis combinado segmentos + churn, interpretacion y reflexion critica.
 
-- Identificar segmentos de clientes segun frecuencia, recencia y gasto (RFM)
-- Detectar que productos o categorias concentran mayor facturacion
-- Analizar la distribucion geografica de ventas por pais
-- Estudiar patrones de cancelacion de transacciones
-- Construir una base analitica para futuros modelos predictivos o dashboards
+### Prototipo funcional
 
-## Dataset
+- `notebooks/7-deploy/streamlit_app.py`
+  - Exploracion de segmentos.
+  - Ranking de clientes en riesgo.
+  - Buscador de cliente.
+  - Simulador de nuevos clientes con muestreo aleatorio realista.
+  - Seccion de propuesta de despliegue.
+
+### Artefactos esperados
+
+- Modelos: `data/06_models/kmeans_model.pkl`, `data/06_models/churn_model.pkl`
+- Salidas: `data/07_model_output/clientes_segmentados.parquet`, `data/07_model_output/churn_predictions.parquet`
+- Reporting: `data/08_reporting/*.png` (segmentos, churn y evaluacion)
+
+---
+
+## Dataset y enriquecimiento
 
 | Atributo | Detalle |
 |----------|---------|
-| **Fuente** | [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/352/online+retail) |
-| **Archivo** | `Online Retail.xlsx` |
-| **Registros** | 541.909 transacciones originales → 397.884 validas (post-limpieza) |
-| **Periodo** | 01/12/2010 - 09/12/2011 |
-| **Variables originales** | InvoiceNo, StockCode, Description, Quantity, InvoiceDate, UnitPrice, CustomerID, Country |
-| **Variables enriquecidas** | +50 atributos por producto (color, material, tamaño, estilo, flags, métricas) |
+| Fuente | [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/352/online+retail) |
+| Archivo | `Online Retail.xlsx` |
+| Registros | 541.909 originales -> 397.884 validos |
+| Clientes unicos | 4.338 |
+| Variables originales | `InvoiceNo`, `StockCode`, `Description`, `Quantity`, `InvoiceDate`, `UnitPrice`, `CustomerID`, `Country` |
+| Enriquecimiento | +50 atributos por producto derivados de `Description` (regex) |
 
-Descarga directa: [online+retail.zip](https://archive.ics.uci.edu/static/public/352/online+retail.zip)
+Descarga directa del dataset: [online+retail.zip](https://archive.ics.uci.edu/static/public/352/online+retail.zip)
 
-### Enriquecimiento del Dataset
-
-En respuesta al feedback de la Entrega 01, implementamos un proceso de **enriquecimiento del campo `Description`** para extraer atributos latentes de los productos:
-
-- **3.877 productos unicos** enriquecidos con expresiones regulares (regex)
-- **59.68%** de productos tienen al menos 1 atributo detectado
-- **Atributos extraidos:** 15 colores, 13 materiales, 6 tamanos, 9 estilos, identificacion de sets/packs
-- **Resultado:** Dataset con **58 columnas por producto** (8 originales + 50 derivadas)
-
-Ver notebook: `notebooks/4-feat_eng/05-gc-product_enrichment_regex-2026_04_01.ipynb`
+---
 
 ## Configuracion del entorno
 
-### Requisitos previos
+### Requisitos
 
-- [Git](https://git-scm.com/)
-- [Python](https://www.python.org/) >= 3.11
-- [Make](https://www.gnu.org/software/make/) (opcional)
+- Python `>=3.11`
+- Git
+- (opcional) Make
 
-### Extensiones recomendadas (VS Code / Cursor)
-
-Para visualizar los archivos `.parquet` generados por los notebooks directamente desde el editor, instalar la extension [Parquet Visualizer](https://marketplace.cursorapi.com/items/?itemName=lucien-martijn.parquet-visualizer):
-
-```
-ext install lucien-martijn.parquet-visualizer
-```
-
-Las demas extensiones recomendadas del proyecto se instalan automaticamente al abrir el repositorio (ver `.vscode/extensions.json`).
-
-### Instalacion
+### Instalacion rapida
 
 ```bash
 git clone https://github.com/gonrc/segmentacion-clientes-ecommerce.git
 cd segmentacion-clientes-ecommerce
-
-# Crear entorno virtual
 python3 -m venv .venv
-source .venv/bin/activate  # En Windows: .venv\Scripts\activate
-
-# Instalar dependencias
-pip install pandas openpyxl pyarrow matplotlib seaborn jupyter nbconvert scikit-learn scipy
+source .venv/bin/activate
+pip install pandas openpyxl pyarrow matplotlib seaborn jupyter nbconvert scikit-learn scipy streamlit
 ```
 
-### Agregar el dataset
-
-Descargar y descomprimir `Online Retail.xlsx`:
+### Cargar dataset crudo
 
 ```bash
 curl -L -o data/01_raw/online_retail.zip https://archive.ics.uci.edu/static/public/352/online+retail.zip
 unzip data/01_raw/online_retail.zip -d data/01_raw/
 ```
 
-O descargar manualmente desde [UCI](https://archive.ics.uci.edu/dataset/352/online+retail) y colocar en `data/01_raw/Online Retail.xlsx`
+---
+
+## Ejecucion reproducible (pipeline Entrega 03)
+
+Para regenerar artefactos de modelado y reportes:
+
+```bash
+.venv/bin/python execute_notebook.py "notebooks/4-feat_eng/06-gc-customer_product_profile-2026_04_01.ipynb"
+.venv/bin/python execute_notebook.py "notebooks/5-models/07-gc-clustering-2026_04_15.ipynb"
+.venv/bin/python execute_notebook.py "notebooks/5-models/08-gc-churn-2026_04_16.ipynb"
+.venv/bin/python execute_notebook.py "notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb"
+```
+
+---
+
+## Ejecutar la app Streamlit
+
+```bash
+.venv/bin/streamlit run "notebooks/7-deploy/streamlit_app.py" --server.fileWatcherType none
+```
+
+Por defecto queda disponible en `http://127.0.0.1:8501`.
+
+---
 
 ## Estructura del proyecto
 
-```
+```text
 .
-├── conf/                          # Archivos de configuracion
+├── conf/
 ├── data/
-│   ├── 01_raw/                    # Datos crudos (Online Retail.xlsx)
-│   ├── 02_intermediate/           # Datos con tipos corregidos
-│   ├── 03_primary/                # Datos limpios y transformados
-│   ├── 04_feature/                # Features (ej: tabla RFM por cliente)
-│   ├── 05_model_input/            # Tablas listas para modelado
-│   ├── 06_models/                 # Modelos serializados
-│   ├── 07_model_output/           # Resultados de modelos
-│   └── 08_reporting/              # Datos para reportes y dashboards
+│   ├── 01_raw/
+│   ├── 02_intermediate/
+│   ├── 03_primary/
+│   ├── 04_feature/
+│   ├── 05_model_input/
+│   ├── 06_models/
+│   ├── 07_model_output/
+│   └── 08_reporting/
 ├── notebooks/
-│   ├── 1-data/                    # Carga, limpieza y preparacion
-│   ├── 2-exploration/             # Analisis exploratorio (EDA)
-│   ├── 3-analysis/                # Analisis estadistico
-│   ├── 4-feat_eng/                # Ingenieria de features (RFM, etc.)
-│   ├── 5-models/                  # Entrenamiento (clustering, etc.)
-│   ├── 6-interpretation/          # Interpretacion de segmentos
-│   ├── 7-deploy/                  # Despliegue
-│   └── 8-reports/                 # Narrativa y conclusiones
-├── src/                           # Codigo fuente reutilizable
-│   ├── data/                      # Funciones de extraccion y procesamiento
-│   ├── model/                     # Funciones de entrenamiento y evaluacion
-│   ├── inference/                 # Prediccion y serving
-│   └── pipelines/                 # Pipelines (feature, training, inference)
-├── tests/                         # Tests del proyecto
-├── Makefile                       # Comandos de automatizacion
-├── pyproject.toml                 # Dependencias y configuracion
+│   ├── 1-data/
+│   ├── 2-exploration/
+│   ├── 3-analysis/
+│   ├── 4-feat_eng/
+│   ├── 5-models/
+│   ├── 6-interpretation/
+│   ├── 7-deploy/
+│   └── 8-reports/
+├── src/
+├── tests/
+├── pyproject.toml
 └── README.md
 ```
 
-## Roadmap del proyecto
+## Nota sobre versionado de datos
 
-| Entrega | Fecha limite | Estado | Contenido |
-|---------|-------------|--------|-----------|
-| **1ra** | 24/03/2026 | ✅ Completada (25/03/2026) | Propuesta de proyecto: problema, objetivos, datos, viabilidad |
-| **2da** | 28/04/2026 | ✅ Completada (actualizada 03/04/2026) | Recopilacion y preparacion de datos: limpieza, EDA, features RFM + enriquecimiento |
-| **Post-feedback** | - | ✅ Completada (01/04/2026) | Enriquecimiento Fase 1: +50 atributos/producto con regex (colores, materiales, estilos, tamaños) |
-| **3ra** | 23/06/2026 | 🚧 En progreso | Clustering con features enriquecidos, modelo de churn, interpretacion de segmentos, prototipo y presentacion |
-
-### Notebooks entregados
-
-**Entrega 02 (actualizada 03/04/2026):**
-- `01-gc-carga_y_limpieza-2026_03_18.ipynb` - Carga, limpieza y justificacion del dataset
-- `02-gc-eda_ventas-2026_03_18.ipynb` - Analisis exploratorio con **14 visualizaciones** (10 EDA + 4 enriquecimiento)
-- `04-gc-rfm_por_cliente-2026_03_18.ipynb` - Feature engineering RFM y reflexion final
-- `05-gc-product_enrichment_regex-2026_04_01.ipynb` - **Enriquecimiento de productos** con regex (Fase 1)
-
-**Archivos generados:**
-- `data/04_feature/productos_enriquecidos_regex.parquet` - 3,877 productos con 58 columnas
-- `data/04_feature/rfm_clientes_enriched.parquet` - RFM + preferencias de producto por cliente
-- `data/08_reporting/*.png` - 14 graficos (10 EDA + 4 enriquecimiento)
-
-**Modelado local generado (19/04/2026):**
-- `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb` - Clustering K-Means con features enriquecidos
-- `notebooks/5-models/08-gc-churn-2026_04_16.ipynb` - Modelo supervisado de churn
-- `notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb` - Dashboard e interpretacion de segmentos
-- `data/05_model_input/churn_dataset.parquet` - Dataset listo para entrenamiento de churn
-- `data/06_models/kmeans_model.pkl` - Modelo de clustering serializado
-- `data/06_models/churn_model.pkl` - Modelo de churn serializado
-- `data/07_model_output/clientes_segmentados.parquet` - Segmentos asignados por cliente
-- `data/07_model_output/churn_predictions.parquet` - Predicciones de churn por cliente
-
-## Notebooks y analisis
-
-### Ejecutar notebooks
-
-```bash
-jupyter notebook  # Abrir interfaz de Jupyter
-```
-
-Los notebooks estan organizados por fase en `notebooks/`:
-- `1-data/` - Carga y limpieza
-- `2-exploration/` - Analisis exploratorio
-- `4-feat_eng/` - Ingenieria de features (RFM, atributos de producto)
-- `5-models/` - Clustering, churn y evaluacion de modelos
-
-### Verificacion de cumplimiento
-
-Ver `notebooks/ENTREGA02_CUMPLIMIENTO.md` para detalles de cumplimiento de requisitos de la Entrega 02.
+Los archivos de `data/` estan excluidos del repositorio por tamano.  
+Para correr notebooks/app en otra maquina, hay que descargar el dataset y regenerar los artefactos locales.
 
 ## Creditos
 
-Proyecto generado a partir del [data science project template](https://github.com/JoseRZapata/data-science-project-template) de [@JoseRZapata](https://github.com/JoseRZapata).
+Proyecto basado en el [data science project template](https://github.com/JoseRZapata/data-science-project-template).

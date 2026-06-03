@@ -90,13 +90,20 @@ Descarga directa del dataset: [online+retail.zip](https://archive.ics.uci.edu/st
 
 ### Instalacion rapida
 
+Las dependencias se declaran en un unico lugar: **`pyproject.toml`** (con versiones exactas fijadas en `uv.lock`). No hay listas de paquetes duplicadas en este README ni un `requirements.txt` paralelo, para evitar divergencias.
+
 ```bash
 git clone https://github.com/gonrc/segmentacion-clientes-ecommerce.git
 cd segmentacion-clientes-ecommerce
-python3 -m venv .venv
-source .venv/bin/activate
-pip install pandas openpyxl pyarrow matplotlib seaborn jupyter nbconvert scikit-learn scipy streamlit
+
+# Opcion recomendada (uv): crea el entorno e instala runtime + dev + docs
+uv sync
+
+# Si no tenes uv instalado:
+pip install uv && uv sync
 ```
+
+Esto crea el entorno virtual en `.venv/` con todas las dependencias necesarias (incluido Streamlit para el prototipo).
 
 ### Cargar dataset crudo
 

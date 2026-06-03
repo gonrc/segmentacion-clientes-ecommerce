@@ -16,6 +16,8 @@ MEDIUM_RISK_THRESHOLD = 0.4
 DEFAULT_CHURN_THRESHOLD = MEDIUM_RISK_THRESHOLD
 DEFAULT_TOP_N = 25
 MAX_TOP_N = 200
+SEGMENT_NOISE_FRACTION = 0.06
+KMEANS_DOMINANCE_THRESHOLD = 0.95
 
 ARTIFACTS = {
     "clientes_segmentados": DATA_DIR / "07_model_output/clientes_segmentados.parquet",
@@ -396,18 +398,122 @@ def initialize_simulator_state(stats: dict[str, dict[str, float]]) -> None:
         st.session_state[key] = clamp(current_value, min_value, max_value)
 
 
-def randomize_simulator_state(stats: dict[str, dict[str, float]]) -> None:
+def build_anchor_pool(churn_dataset: pd.DataFrame, segmented: pd.DataFrame) -> pd.DataFrame:
+    churn_cols = [
+        "CustomerID",
+        *[field for field in SIMULATOR_FIELDS if field in churn_dataset.columns],
+    ]
+    pool = churn_dataset[churn_cols].copy()
+
+    missing_fields = [field for field in SIMULATOR_FIELDS if field not in pool.columns]
+    if missing_fields and "CustomerID" in segmented.columns:
+        seg_cols = [
+            "CustomerID",
+            *[field for field in missing_fields if field in segmented.columns],
+        ]
+        pool = pool.merge(segmented[seg_cols], on="CustomerID", how="left")
+
+    if "CustomerID" in pool.columns and {"CustomerID", "Segment_label"}.issubset(segmented.columns):
+        pool = pool.merge(segmented[["CustomerID", "Segment_label"]], on="CustomerID", how="left")
+    else:
+        pool["Segment_label"] = "unknown"
+
+    available_fields = [field for field in SIMULATOR_FIELDS if field in pool.columns]
+    if not available_fields:
+        return pd.DataFrame(columns=[*SIMULATOR_FIELDS, "Segment_label"])
+
+    return pool[[*available_fields, "Segment_label"]]
+
+
+def segment_sampling_weights(anchor_pool: pd.DataFrame) -> dict[str, float]:
+    if anchor_pool.empty or "Segment_label" not in anchor_pool.columns:
+        return {}
+
+    weights = (
+        anchor_pool["Segment_label"].dropna().astype(str).value_counts(normalize=True).to_dict()
+    )
+    return {segment: float(weight) for segment, weight in weights.items()}
+
+
+def randomize_simulator_state(  # noqa: C901, PLR0912
+    stats: dict[str, dict[str, float]],
+    anchor_pool: pd.DataFrame,
+    kmeans_bundle: dict[str, Any],
+    labels: dict[int, str],
+) -> None:
+    if anchor_pool.empty:
+        values = {field: float(stats[field]["median"]) for field in SIMULATOR_FIELDS}
+        for field in SIMULATOR_FIELDS:
+            st.session_state[simulator_key(field)] = (
+                bool(round(values[field])) if field == "is_color_specialist" else values[field]
+            )
+        return
+
+    weights = segment_sampling_weights(anchor_pool)
+    segments = list(weights.keys())
+    if segments:
+        target_segment = random.choices(  # noqa: S311
+            segments, weights=[weights[segment] for segment in segments], k=1
+        )[0]
+        segment_pool = anchor_pool[anchor_pool["Segment_label"].astype(str) == target_segment]
+        if segment_pool.empty:
+            segment_pool = anchor_pool
+    else:
+        target_segment = "VIP"
+        segment_pool = anchor_pool
+
+    generated_values: dict[str, float] = {}
+    for _ in range(12):
+        anchor = segment_pool.sample(n=1).iloc[0]
+        candidate_values: dict[str, float] = {}
+
+        for field in SIMULATOR_FIELDS:
+            min_value = stats[field]["min"]
+            max_value = stats[field]["max"]
+
+            raw_value = anchor.get(field, stats[field]["median"])
+            if pd.isna(raw_value):
+                raw_value = stats[field]["median"]
+            if field == "is_color_specialist":
+                candidate_values[field] = float(round(float(raw_value)))
+                continue
+
+            base_value = float(raw_value)
+            if min_value == max_value:
+                candidate_values[field] = float(min_value)
+                continue
+
+            if field in segment_pool.columns:
+                local_series = pd.to_numeric(segment_pool[field], errors="coerce").dropna()
+            else:
+                local_series = pd.Series(dtype="float64")
+
+            if local_series.empty:
+                local_min = min_value
+                local_max = max_value
+                local_span = max_value - min_value
+            else:
+                local_min = float(local_series.quantile(0.05))
+                local_max = float(local_series.quantile(0.95))
+                local_span = max(local_max - local_min, 1e-6)
+
+            noise_std = max(local_span * SEGMENT_NOISE_FRACTION, abs(base_value) * 0.01, 1e-6)
+            candidate = base_value + random.gauss(0, noise_std)
+            candidate_values[field] = clamp(
+                candidate, max(min_value, local_min), min(max_value, local_max)
+            )
+
+        generated_values = candidate_values
+        predicted_segment = predict_segment(kmeans_bundle, generated_values, labels)
+        if predicted_segment == target_segment:
+            break
+
     for field in SIMULATOR_FIELDS:
-        key = simulator_key(field)
-        min_value = stats[field]["min"]
-        max_value = stats[field]["max"]
-        if field == "is_color_specialist":
-            st.session_state[key] = bool(random.randint(int(min_value), int(max_value)))  # noqa: S311
-            continue
-        if min_value == max_value:
-            st.session_state[key] = min_value
-            continue
-        st.session_state[key] = random.uniform(min_value, max_value)  # noqa: S311
+        st.session_state[simulator_key(field)] = (
+            bool(round(generated_values[field]))
+            if field == "is_color_specialist"
+            else float(generated_values[field])
+        )
 
 
 def number_input_for_field(field: str, stats: dict[str, dict[str, float]]) -> float:
@@ -434,15 +540,21 @@ def number_input_for_field(field: str, stats: dict[str, dict[str, float]]) -> fl
 
 
 def collect_simulation_inputs(
-    churn_dataset: pd.DataFrame, segmented: pd.DataFrame
+    churn_dataset: pd.DataFrame,
+    segmented: pd.DataFrame,
+    kmeans_bundle: dict[str, Any],
+    labels: dict[int, str],
 ) -> dict[str, float]:
     stats = simulator_stats([churn_dataset, segmented])
+    anchor_pool = build_anchor_pool(churn_dataset, segmented)
     initialize_simulator_state(stats)
 
     st.write("Cargar valores del cliente a evaluar.")
-    st.caption("El cliente random usa valores entre el minimo y maximo observados para cada campo.")
+    st.caption(
+        "El cliente random parte de un cliente real y aplica una variacion pequena por variable."
+    )
     if st.button("Generar cliente random", type="secondary"):
-        randomize_simulator_state(stats)
+        randomize_simulator_state(stats, anchor_pool, kmeans_bundle, labels)
 
     col1, col2, col3 = st.columns(3)
     values: dict[str, float] = {}
@@ -479,9 +591,26 @@ def predict_probability(bundle: dict[str, Any], values: dict[str, float]) -> flo
 
 
 def predict_segment(
-    bundle: dict[str, Any], values: dict[str, float], labels: dict[int, str]
+    bundle: dict[str, Any],
+    values: dict[str, float],
+    labels: dict[int, str],
+    segmented_reference: pd.DataFrame | None = None,
+    use_reference_fallback: bool = False,
 ) -> str:
     features = list(bundle["features"])
+
+    if use_reference_fallback and segmented_reference is not None and not segmented_reference.empty:
+        ref_features = [feature for feature in features if feature in segmented_reference.columns]
+        if ref_features:
+            ref = segmented_reference.dropna(subset=[*ref_features, "Segment_label"]).copy()
+            if not ref.empty:
+                centroids = ref.groupby("Segment_label")[ref_features].mean()
+                sample = pd.Series(
+                    {feature: float(values.get(feature, 0.0)) for feature in ref_features}
+                )
+                distances = ((centroids - sample) ** 2).sum(axis=1)
+                return str(distances.idxmin())
+
     model_input = pd.DataFrame([{feature: values.get(feature, 0.0) for feature in features}])
     scaler_input = (
         model_input if hasattr(bundle["scaler"], "feature_names_in_") else model_input.to_numpy()
@@ -495,11 +624,33 @@ def render_simulator(churn_dataset: pd.DataFrame, segmented: pd.DataFrame) -> No
     churn_bundle = load_pickle(str(ARTIFACTS["churn_model"]))
     kmeans_bundle = load_pickle(str(ARTIFACTS["kmeans_model"]))
     labels = cluster_label_map(segmented)
+    kmeans_features = [
+        feature for feature in kmeans_bundle["features"] if feature in segmented.columns
+    ]
+    fallback_segment_predictor = False
+    if kmeans_features:
+        sample_input = segmented[kmeans_features]
+        scaler_input = (
+            sample_input
+            if hasattr(kmeans_bundle["scaler"], "feature_names_in_")
+            else sample_input.to_numpy()
+        )
+        sample_pred = pd.Series(
+            kmeans_bundle["model"].predict(kmeans_bundle["scaler"].transform(scaler_input))
+        )
+        dominance = float(sample_pred.value_counts(normalize=True).iloc[0])
+        fallback_segment_predictor = dominance >= KMEANS_DOMINANCE_THRESHOLD
 
-    values = collect_simulation_inputs(churn_dataset, segmented)
+    values = collect_simulation_inputs(churn_dataset, segmented, kmeans_bundle, labels)
     if st.button("Calcular score", type="primary"):
         probability = predict_probability(churn_bundle, values)
-        segment = predict_segment(kmeans_bundle, values, labels)
+        segment = predict_segment(
+            kmeans_bundle,
+            values,
+            labels,
+            segmented_reference=segmented,
+            use_reference_fallback=fallback_segment_predictor,
+        )
         risk = risk_level(probability)
 
         col1, col2, col3 = st.columns(3)

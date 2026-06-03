@@ -5,7 +5,7 @@
 
 **Trabajo Practico - Ciencia de Datos Aplicada | ITBA | 1er Cuatrimestre 2026 | Grupo 12**
 
-> **Estado actual (19/04/2026):** ✅ Entrega 02 completada con enriquecimiento | ✅ Dataset enriquecido (+50 atributos/producto) | ✅ Modelos locales generados (`kmeans_model.pkl`, `churn_model.pkl`) | ⏳ Entrega 03 en progreso
+> **Estado actual (03/06/2026):** ✅ Entrega 02 completada con enriquecimiento | ✅ Modelos de segmentacion y churn generados | ✅ Prototipo Streamlit de Entrega 03 disponible | ⏳ Presentacion oral pendiente
 
 ---
 
@@ -84,13 +84,14 @@ Las demas extensiones recomendadas del proyecto se instalan automaticamente al a
 git clone https://github.com/gonrc/segmentacion-clientes-ecommerce.git
 cd segmentacion-clientes-ecommerce
 
-# Crear entorno virtual
-python3 -m venv .venv
-source .venv/bin/activate  # En Windows: .venv\Scripts\activate
+# Instalar dependencias con uv
+uv sync
 
-# Instalar dependencias
-pip install pandas openpyxl pyarrow matplotlib seaborn jupyter nbconvert scikit-learn scipy
+# Activar entorno si se desea ejecutar comandos manuales
+source .venv/bin/activate
 ```
+
+Si no se usa `uv`, crear un entorno Python >= 3.11 e instalar las dependencias declaradas en `pyproject.toml`.
 
 ### Agregar el dataset
 
@@ -102,6 +103,8 @@ unzip data/01_raw/online_retail.zip -d data/01_raw/
 ```
 
 O descargar manualmente desde [UCI](https://archive.ics.uci.edu/dataset/352/online+retail) y colocar en `data/01_raw/Online Retail.xlsx`
+
+El dataset crudo no se versiona en Git. Para la demo de Entrega 03 si se versionan artefactos livianos ya generados: datasets de modelado, modelos serializados, predicciones y graficos clave.
 
 ## Estructura del proyecto
 
@@ -144,7 +147,7 @@ O descargar manualmente desde [UCI](https://archive.ics.uci.edu/dataset/352/onli
 | **1ra** | 24/03/2026 | ✅ Completada (25/03/2026) | Propuesta de proyecto: problema, objetivos, datos, viabilidad |
 | **2da** | 28/04/2026 | ✅ Completada (actualizada 03/04/2026) | Recopilacion y preparacion de datos: limpieza, EDA, features RFM + enriquecimiento |
 | **Post-feedback** | - | ✅ Completada (01/04/2026) | Enriquecimiento Fase 1: +50 atributos/producto con regex (colores, materiales, estilos, tamaños) |
-| **3ra** | 23/06/2026 | 🚧 En progreso | Clustering con features enriquecidos, modelo de churn, interpretacion de segmentos, prototipo y presentacion |
+| **3ra** | 23/06/2026 | 🚧 En cierre | Clustering con features enriquecidos, modelo de churn, interpretacion de segmentos y prototipo funcional. Pendiente: presentacion oral |
 
 ### Notebooks entregados
 
@@ -169,6 +172,28 @@ O descargar manualmente desde [UCI](https://archive.ics.uci.edu/dataset/352/onli
 - `data/07_model_output/clientes_segmentados.parquet` - Segmentos asignados por cliente
 - `data/07_model_output/churn_predictions.parquet` - Predicciones de churn por cliente
 
+**Entrega 03 consolidada (03/06/2026):**
+- `notebooks/8-reports/10-gc-entrega03_modelado_y_solucion-2026_06_03.ipynb` - Notebook narrativo unificado
+- `notebooks/8-reports/ENTREGA03_CUMPLIMIENTO.md` - Checklist contra consigna
+- `notebooks/7-deploy/streamlit_app.py` - Prototipo funcional Streamlit
+
+### Prototipo Streamlit
+
+Ejecutar desde la raiz del repositorio:
+
+```bash
+uv sync
+uv run streamlit run notebooks/7-deploy/streamlit_app.py
+```
+
+La app permite:
+- Ver KPIs ejecutivos de segmentos y churn.
+- Explorar segmentos y graficos de interpretacion.
+- Filtrar clientes con mayor probabilidad de churn.
+- Buscar un cliente por `CustomerID`.
+- Simular un cliente nuevo y estimar probabilidad de churn, riesgo y segmento.
+- Revisar una propuesta de despliegue real.
+
 ## Notebooks y analisis
 
 ### Ejecutar notebooks
@@ -186,6 +211,7 @@ Los notebooks estan organizados por fase en `notebooks/`:
 ### Verificacion de cumplimiento
 
 Ver `notebooks/ENTREGA02_CUMPLIMIENTO.md` para detalles de cumplimiento de requisitos de la Entrega 02.
+Ver `notebooks/8-reports/ENTREGA03_CUMPLIMIENTO.md` para el checklist de la Entrega 03.
 
 ## Creditos
 

@@ -4,6 +4,20 @@ data/**
 # except their sub-folders
 !data/**/
 !data/README.md
+!data/04_feature/rfm_clientes_enriched.parquet
+!data/05_model_input/churn_dataset.parquet
+!data/06_models/kmeans_model.pkl
+!data/06_models/churn_model.pkl
+!data/07_model_output/clientes_segmentados.parquet
+!data/07_model_output/churn_predictions.parquet
+!data/08_reporting/segment_dashboard.png
+!data/08_reporting/churn_by_segment.png
+!data/08_reporting/segment_churn_risk.png
+!data/08_reporting/churn_feature_importance.png
+!data/08_reporting/churn_confusion_matrices.png
+!data/08_reporting/churn_roc_curves.png
+!data/08_reporting/clustering_k_selection.png
+!data/08_reporting/clustering_heatmap.png
 
 # also keep all .gitkeep files
 !.gitkeep

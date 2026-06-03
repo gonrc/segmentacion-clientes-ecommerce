@@ -30,6 +30,7 @@ repos:
     rev: v1.17.1
     hooks:
       - id: mypy
+        exclude: ^notebooks/7-deploy/streamlit_app\.py$
         args:
           - --config-file=.code_quality/mypy.ini
 

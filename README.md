@@ -40,6 +40,8 @@ Este repositorio refleja la evolución completa del trabajo práctico y queda pr
 
 Foco de la entrega: implementación, validación y persistencia de los modelos. Todo el trabajo es reproducible mediante notebooks.
 
+> **Notebook principal (storytelling para la presentación):** [`notebooks/8-reports/10-gc-entrega03_modelado-2026_06_03.ipynb`](notebooks/8-reports/10-gc-entrega03_modelado-2026_06_03.ipynb). Recorre de punta a punta enfoque, implementación, evaluación, análisis de negocio (segmentos × churn), reflexión crítica y persistencia. Los notebooks de detalle (`07`, `08`, `09`) quedan como respaldo.
+
 ### Modelado y validación
 
 - `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb`
@@ -189,9 +191,10 @@ Para una revisión rápida de los entregables:
 
 1. `README.md` (este documento).
 2. Entrega 03 (modelado):
-   - `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb`.
-   - `notebooks/5-models/08-gc-churn-2026_04_16.ipynb`.
-   - `notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb`.
+   - **Principal:** `notebooks/8-reports/10-gc-entrega03_modelado-2026_06_03.ipynb` (notebook unificado de presentación).
+   - Detalle: `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb`.
+   - Detalle: `notebooks/5-models/08-gc-churn-2026_04_16.ipynb`.
+   - Detalle: `notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb`.
 3. Entrega 04 (despliegue e interfaz):
    - `notebooks/7-deploy/streamlit_app.py` (prototipo).
 

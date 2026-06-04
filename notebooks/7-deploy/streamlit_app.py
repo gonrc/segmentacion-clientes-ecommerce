@@ -18,7 +18,6 @@ DEFAULT_CHURN_THRESHOLD = MEDIUM_RISK_THRESHOLD
 DEFAULT_TOP_N = 25
 MAX_TOP_N = 200
 SEGMENT_NOISE_FRACTION = 0.06
-KMEANS_DOMINANCE_THRESHOLD = 0.95
 MIN_CLUSTER_FEATURES = 2
 MIN_CLUSTER_COUNT = 2
 MIN_CLUSTER_ROWS = 10
@@ -43,23 +42,23 @@ REPORTS = {
 }
 
 SEGMENT_ACTIONS = {
-    "VIP": "Retencion prioritaria: contacto personalizado, beneficios por continuidad y alertas de riesgo.",
+    "VIP": "Retención prioritaria: contacto personalizado, beneficios por continuidad y alertas de riesgo.",
     "Compradores de Sets": "Promover bundles, packs y cross-selling de productos complementarios.",
     "En Riesgo": "Revisar fricciones, cancelaciones y experiencia post-compra antes de invertir en upselling.",
-    "Dormidos": "Campanas de reactivacion de bajo costo con ofertas simples y mensajes automatizados.",
+    "Dormidos": "Campañas de reactivación de bajo costo con ofertas simples y mensajes automatizados.",
 }
 
 SEGMENT_DESCRIPTIONS = {
-    "VIP": "Clientes de alto valor, alta frecuencia y mayor participacion en revenue.",
+    "VIP": "Clientes de alto valor, alta frecuencia y mayor participación en revenue.",
     "Compradores de Sets": "Clientes con afinidad marcada por productos tipo set o pack.",
     "En Riesgo": "Clientes con mayor cancel rate y bajo revenue relativo.",
     "Dormidos": "Clientes con baja actividad reciente y menor frecuencia de compra.",
 }
 
 RISK_LABELS = {
-    "Bajo": "Mantener comunicacion regular y beneficios livianos.",
+    "Bajo": "Mantener comunicación regular y beneficios livianos.",
     "Medio": "Activar incentivo puntual y monitorear respuesta.",
-    "Alto": "Priorizar contacto comercial y accion de retencion personalizada.",
+    "Alto": "Priorizar contacto comercial y acción de retención personalizada.",
 }
 
 SIMULATOR_FIELDS = [
@@ -116,7 +115,7 @@ def risk_level(probability: float) -> str:
 def segment_recommendation(segment: str, probability: float) -> str:
     risk = risk_level(probability)
     segment_action = SEGMENT_ACTIONS.get(
-        segment, "Revisar perfil y definir accion comercial puntual."
+        segment, "Revisar perfil y definir acción comercial puntual."
     )
     return f"Riesgo {risk}. {RISK_LABELS[risk]} {segment_action}"
 
@@ -228,17 +227,17 @@ def display_report_image(key: str, caption: str) -> None:
     if path.exists():
         st.image(str(path), caption=caption, width="stretch")
     else:
-        st.warning(f"No se encontro {path.relative_to(ROOT)}")
+        st.warning(f"No se encontró {path.relative_to(ROOT)}")
 
 
 def render_header() -> None:
     st.set_page_config(
-        page_title="Segmentacion y Churn de Clientes E-commerce",
+        page_title="Segmentación y Churn de Clientes E-commerce",
         page_icon=":bar_chart:",
         layout="wide",
     )
-    st.title("Segmentacion y Churn de Clientes E-commerce")
-    st.caption("Entrega 03 - Prototipo funcional para exploracion, scoring y despliegue")
+    st.title("Segmentación y Churn de Clientes E-commerce")
+    st.caption("Entrega 03 - Prototipo funcional para exploración, scoring y despliegue")
 
 
 def render_sidebar(customer_table: pd.DataFrame) -> None:
@@ -250,7 +249,7 @@ def render_sidebar(customer_table: pd.DataFrame) -> None:
     )
     st.sidebar.markdown("---")
     st.sidebar.write("Modelos usados:")
-    st.sidebar.write("- K-Means para segmentacion")
+    st.sidebar.write("- K-Means para segmentación")
     st.sidebar.write("- Random Forest para churn")
 
 
@@ -274,28 +273,28 @@ def render_executive_summary(customer_table: pd.DataFrame) -> None:
             format_money(float(risk_clients["Monetary"].sum())),
         )
     with st.container(border=True):
-        st.markdown("#### Metodologia en una linea")
+        st.markdown("#### Metodología en una línea")
         st.write(
-            "- **Segmentacion (K-Means):** identifica perfiles de clientes para orientar estrategias.\n"
-            "- **Churn (Random Forest):** estima probabilidad de abandono para priorizar retencion."
+            "- **Segmentación (K-Means):** identifica perfiles de clientes para orientar estrategias.\n"
+            "- **Churn (Random Forest):** estima probabilidad de abandono para priorizar retención."
         )
         st.info(
-            "Lectura ejecutiva: la solucion combina segmentos de negocio con probabilidad de churn "
+            "Lectura ejecutiva: la solución combina segmentos de negocio con probabilidad de churn "
             "para priorizar acciones comerciales, especialmente en clientes VIP con riesgo elevado."
         )
         st.caption(
-            "Nota: el umbral de priorizacion actual es 0.40. Puede ajustarse en la pestana de Churn."
+            "Nota: el umbral de priorización actual es 0.40. Puede ajustarse en la pestaña de Churn."
         )
     churn_metrics = compute_churn_metrics(customer_table)
     if churn_metrics:
         with st.container(border=True):
-            st.markdown("#### Validacion tecnica (churn)")
+            st.markdown("#### Validación técnica (churn)")
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("AUC-ROC", f"{churn_metrics['auc']:.3f}")
             m2.metric("F1-score", f"{churn_metrics['f1']:.3f}")
             m3.metric("Precision", f"{churn_metrics['precision']:.3f}")
             m4.metric("Recall", f"{churn_metrics['recall']:.3f}")
-            display_report_image("churn_confusion_matrices", "Matriz de confusion (test)")
+            display_report_image("churn_confusion_matrices", "Matriz de confusión (test)")
 
     display_report_image("segment_dashboard", "Dashboard de segmentos")
 
@@ -327,7 +326,7 @@ def render_segments(customer_table: pd.DataFrame) -> None:
             st.metric("Silhouette score (clustering)", f"{cluster_metrics['silhouette']:.3f}")
 
     with st.container(border=True):
-        st.subheader("Interpretacion comercial por segmento")
+        st.subheader("Interpretación comercial por segmento")
         cols = st.columns(4)
         for col, (segment, description) in zip(cols, SEGMENT_DESCRIPTIONS.items(), strict=False):
             with col:  # noqa: SIM117
@@ -337,12 +336,12 @@ def render_segments(customer_table: pd.DataFrame) -> None:
                     st.caption(SEGMENT_ACTIONS[segment])
 
     with st.container(border=True):
-        st.subheader("Diagnostico del clustering")
+        st.subheader("Diagnóstico del clustering")
         left, right = st.columns(2)
         with left:
             display_report_image("clustering_heatmap", "Centroides normalizados")
         with right:
-            display_report_image("clustering_k_selection", "Seleccion de k")
+            display_report_image("clustering_k_selection", "Selección de k")
 
 
 def render_churn(customer_table: pd.DataFrame) -> None:
@@ -352,7 +351,7 @@ def render_churn(customer_table: pd.DataFrame) -> None:
     col1, col2, col3 = st.columns([2, 2, 1])
     selected_segment = col1.selectbox("Segmento", segments)
     threshold = col2.slider(
-        "Umbral minimo de probabilidad",
+        "Umbral mínimo de probabilidad",
         0.0,
         1.0,
         DEFAULT_CHURN_THRESHOLD,
@@ -385,10 +384,10 @@ def render_churn(customer_table: pd.DataFrame) -> None:
         st.subheader("Ranking de clientes en riesgo")
         st.dataframe(ranking, width="stretch", hide_index=True)
         st.caption(
-            "`churn_prob` es probabilidad estimada; `churn_pred` es la clase final segun el umbral del modelo."
+            "`churn_prob` es probabilidad estimada; `churn_pred` es la clase final según el umbral del modelo."
         )
         st.caption(
-            "Uso recomendado: ranking para priorizacion comercial, no como explicacion causal."
+            "Uso recomendado: ranking para priorización comercial, no como explicación causal."
         )
 
     with st.container(border=True):
@@ -398,10 +397,10 @@ def render_churn(customer_table: pd.DataFrame) -> None:
             display_report_image("churn_feature_importance", "Importancia de variables")
         with right:
             display_report_image("churn_by_segment", "Churn por segmento")
-    with st.expander("Ver metricas tecnicas de validacion (detalle)"):
+    with st.expander("Ver métricas técnicas de validación (detalle)"):
         c1, c2 = st.columns(2)
         with c1:
-            display_report_image("churn_confusion_matrices", "Matrices de confusion")
+            display_report_image("churn_confusion_matrices", "Matrices de confusión")
         with c2:
             display_report_image("churn_roc_curves", "Curvas ROC")
 
@@ -417,7 +416,7 @@ def render_customer_lookup(customer_table: pd.DataFrame) -> None:
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Segmento", segment)
     col2.metric("Probabilidad churn", format_pct(probability))
-    col3.metric("Prediccion", "Churn" if int(row["churn_pred"]) == 1 else "Retenido")
+    col3.metric("Predicción", "Churn" if int(row["churn_pred"]) == 1 else "Retenido")
     col4.metric("Monetary", format_money(float(row["Monetary"])))
 
     st.subheader("Perfil del cliente")
@@ -444,13 +443,13 @@ def render_customer_lookup(customer_table: pd.DataFrame) -> None:
             st.markdown("#### RFM y valor")
             rfm_df = pd.DataFrame(
                 [
-                    ("Recency (dias)", customer_value("Recency", "int")),
+                    ("Recency (días)", customer_value("Recency", "int")),
                     ("Frequency", customer_value("Frequency", "int")),
                     ("Monetary", customer_value("Monetary", "money")),
                     ("Cancel rate", customer_value("Cancel_rate", "pct")),
                     ("Ticket promedio", customer_value("avg_order_value", "money")),
                 ],
-                columns=["Metrica", "Valor"],
+                columns=["Métrica", "Valor"],
             )
             st.dataframe(rfm_df, width="stretch", hide_index=True)
 
@@ -467,7 +466,7 @@ def render_customer_lookup(customer_table: pd.DataFrame) -> None:
                     ("% compras en sets", customer_value("pct_purchases_sets", "pct")),
                     ("Cantidad promedio en set", customer_value("avg_quantity_in_set", "float")),
                 ],
-                columns=["Metrica", "Valor"],
+                columns=["Métrica", "Valor"],
             )
             st.dataframe(product_df, width="stretch", hide_index=True)
 
@@ -477,13 +476,13 @@ def render_customer_lookup(customer_table: pd.DataFrame) -> None:
             activity_df = pd.DataFrame(
                 [
                     (
-                        "Dias promedio entre compras",
+                        "Días promedio entre compras",
                         customer_value("avg_days_between_purchases", "float"),
                     ),
                     ("Meses activos", customer_value("months_active", "float")),
-                    ("Productos unicos", customer_value("n_products_unique", "int")),
+                    ("Productos únicos", customer_value("n_products_unique", "int")),
                 ],
-                columns=["Metrica", "Valor"],
+                columns=["Métrica", "Valor"],
             )
             st.dataframe(activity_df, width="stretch", hide_index=True)
 
@@ -574,11 +573,30 @@ def segment_sampling_weights(anchor_pool: pd.DataFrame) -> dict[str, float]:
     return {segment: float(weight) for segment, weight in weights.items()}
 
 
+def real_segment_weights(segmented: pd.DataFrame, anchor_pool: pd.DataFrame) -> dict[str, float]:
+    """Pesos de muestreo del target segun la distribucion real de segmentos.
+
+    Se usa la distribucion de `clientes_segmentados` (universo completo) en lugar de
+    la del anchor pool (churn_dataset, poblacion filtrada que sobre-representa VIP).
+    Se restringe a los segmentos que tienen anchors disponibles y se renormaliza.
+    """
+    real_weights = segment_sampling_weights(segmented)
+    if anchor_pool.empty or "Segment_label" not in anchor_pool.columns:
+        return real_weights
+    available = set(anchor_pool["Segment_label"].dropna().astype(str).unique())
+    filtered = {segment: weight for segment, weight in real_weights.items() if segment in available}
+    total = sum(filtered.values())
+    if total <= 0:
+        return segment_sampling_weights(anchor_pool)
+    return {segment: weight / total for segment, weight in filtered.items()}
+
+
 def randomize_simulator_state(  # noqa: C901, PLR0912
     stats: dict[str, dict[str, float]],
     anchor_pool: pd.DataFrame,
     kmeans_bundle: dict[str, Any],
     labels: dict[int, str],
+    sampling_weights: dict[str, float] | None = None,
 ) -> None:
     if anchor_pool.empty:
         values = {field: float(stats[field]["median"]) for field in SIMULATOR_FIELDS}
@@ -588,7 +606,7 @@ def randomize_simulator_state(  # noqa: C901, PLR0912
             )
         return
 
-    weights = segment_sampling_weights(anchor_pool)
+    weights = sampling_weights or segment_sampling_weights(anchor_pool)
     segments = list(weights.keys())
     if segments:
         target_segment = random.choices(  # noqa: S311
@@ -686,17 +704,18 @@ def collect_simulation_inputs(
 ) -> dict[str, float]:
     stats = simulator_stats([churn_dataset, segmented])
     anchor_pool = build_anchor_pool(churn_dataset, segmented)
+    target_weights = real_segment_weights(segmented, anchor_pool)
     initialize_simulator_state(stats)
 
     st.write("Cargar valores del cliente a evaluar.")
     st.caption(
-        "El cliente random parte de un cliente real y aplica una variacion pequena por variable."
+        "El cliente random parte de un cliente real y aplica una variación pequeña por variable."
     )
     st.caption(
         "Flujo recomendado: 1) generar cliente random, 2) ajustar variables, 3) calcular score."
     )
     if st.button("Generar cliente random", type="secondary"):
-        randomize_simulator_state(stats, anchor_pool, kmeans_bundle, labels)
+        randomize_simulator_state(stats, anchor_pool, kmeans_bundle, labels, target_weights)
 
     values: dict[str, float] = {}
     s1, s2, s3 = st.columns(3)
@@ -746,23 +765,8 @@ def predict_segment(
     bundle: dict[str, Any],
     values: dict[str, float],
     labels: dict[int, str],
-    segmented_reference: pd.DataFrame | None = None,
-    use_reference_fallback: bool = False,
 ) -> str:
     features = list(bundle["features"])
-
-    if use_reference_fallback and segmented_reference is not None and not segmented_reference.empty:
-        ref_features = [feature for feature in features if feature in segmented_reference.columns]
-        if ref_features:
-            ref = segmented_reference.dropna(subset=[*ref_features, "Segment_label"]).copy()
-            if not ref.empty:
-                centroids = ref.groupby("Segment_label")[ref_features].mean()
-                sample = pd.Series(
-                    {feature: float(values.get(feature, 0.0)) for feature in ref_features}
-                )
-                distances = ((centroids - sample) ** 2).sum(axis=1)
-                return str(distances.idxmin())
-
     model_input = pd.DataFrame([{feature: values.get(feature, 0.0) for feature in features}])
     scaler_input = (
         model_input if hasattr(bundle["scaler"], "feature_names_in_") else model_input.to_numpy()
@@ -776,22 +780,6 @@ def render_simulator(churn_dataset: pd.DataFrame, segmented: pd.DataFrame) -> No
     churn_bundle = load_pickle(str(ARTIFACTS["churn_model"]))
     kmeans_bundle = load_pickle(str(ARTIFACTS["kmeans_model"]))
     labels = cluster_label_map(segmented)
-    kmeans_features = [
-        feature for feature in kmeans_bundle["features"] if feature in segmented.columns
-    ]
-    fallback_segment_predictor = False
-    if kmeans_features:
-        sample_input = segmented[kmeans_features]
-        scaler_input = (
-            sample_input
-            if hasattr(kmeans_bundle["scaler"], "feature_names_in_")
-            else sample_input.to_numpy()
-        )
-        sample_pred = pd.Series(
-            kmeans_bundle["model"].predict(kmeans_bundle["scaler"].transform(scaler_input))
-        )
-        dominance = float(sample_pred.value_counts(normalize=True).iloc[0])
-        fallback_segment_predictor = dominance >= KMEANS_DOMINANCE_THRESHOLD
 
     with st.container(border=True):
         values = collect_simulation_inputs(churn_dataset, segmented, kmeans_bundle, labels)
@@ -799,13 +787,7 @@ def render_simulator(churn_dataset: pd.DataFrame, segmented: pd.DataFrame) -> No
     with st.container(border=True):
         if st.button("Calcular score", type="primary"):
             probability = predict_probability(churn_bundle, values)
-            segment = predict_segment(
-                kmeans_bundle,
-                values,
-                labels,
-                segmented_reference=segmented,
-                use_reference_fallback=fallback_segment_predictor,
-            )
+            segment = predict_segment(kmeans_bundle, values, labels)
             risk = risk_level(probability)
 
             col1, col2, col3 = st.columns(3)
@@ -819,8 +801,8 @@ def render_deployment() -> None:
     with st.container(border=True):
         st.subheader("Arquitectura propuesta")
         st.write(
-            "La solucion puede operar como un proceso batch semanal o mensual: ingesta de nuevas "
-            "transacciones, limpieza, generacion de features, scoring de modelos y publicacion en "
+            "La solución puede operar como un proceso batch semanal o mensual: ingesta de nuevas "
+            "transacciones, limpieza, generación de features, scoring de modelos y publicación en "
             "dashboard interno o CRM."
         )
         st.caption("Estado actual: MVP local funcional con Streamlit y artefactos precalculados.")
@@ -841,7 +823,7 @@ def render_deployment() -> None:
                 [
                     ("MVP", "Streamlit con artefactos precalculados."),
                     ("Equipo comercial", "App interna con refresh batch y datos en base central."),
-                    ("Produccion", "API de scoring, orquestador y dashboard conectado a CRM."),
+                    ("Producción", "API de scoring, orquestador y dashboard conectado a CRM."),
                     (
                         "Escala mayor",
                         "Feature store, versionado de modelos y retraining programado.",
@@ -854,8 +836,8 @@ def render_deployment() -> None:
     with st.container(border=True):
         st.subheader("Monitoreo")
         st.write(
-            "Monitorear drift de features, cambios en tamanos de segmentos, F1/AUC mensual, "
-            "churn real posterior y retorno comercial de acciones de retencion."
+            "Monitorear drift de features, cambios en tamaños de segmentos, F1/AUC mensual, "
+            "churn real posterior y retorno comercial de acciones de retención."
         )
 
 

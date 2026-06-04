@@ -5,7 +5,7 @@
 
 **Trabajo Práctico - Ciencia de Datos Aplicada | ITBA | 1er Cuatrimestre 2026 | Grupo 12**
 
-> **Estado actual (03/06/2026):** Entregas 01 y 02 finalizadas. Entrega 03 implementada en `main` con notebooks reproducibles de modelado (`07`, `08`, `09`) y prototipo funcional en Streamlit.
+> **Estado actual (03/06/2026):** Entregas 01, 02 y 03 finalizadas. Entrega 04 (despliegue + interfaz + presentación oral) en progreso, con prototipo funcional en Streamlit sobre los modelos persistidos.
 
 ---
 
@@ -25,28 +25,45 @@ Construir una solución de datos que permita:
 
 ## Resumen por entrega
 
+El Trabajo Práctico se compone de **cuatro entregas**:
+
 | Entrega | Estado | Resultado principal |
 |--------|--------|---------------------|
-| Entrega 01 | Completada | Definición del problema, alcance y dataset base. |
-| Entrega 02 | Completada | Limpieza, EDA, RFM y enriquecimiento de productos vía regex. |
-| Entrega 03 | Completada (implementación) | Modelos de segmentación + churn, validación e interfaz funcional en Streamlit. |
+| Entrega 01 - Propuesta de proyecto | Completada | Definición del problema, objetivo de negocio, alcance y elección del dataset. |
+| Entrega 02 - Recopilación y preparación de datos | Completada | Adquisición del dataset, EDA, limpieza, RFM y enriquecimiento de productos vía regex. |
+| Entrega 03 - Modelado de la solución | Completada | Modelos de segmentación (K-Means) y churn (Random Forest), validación con métricas y persistencia de modelos reutilizables. |
+| Entrega 04 - Despliegue y presentación | En progreso | Interfaz funcional en Streamlit sobre los modelos persistidos. Pendiente: capa de servicio/API y presentación oral. |
 
 Este repositorio refleja la evolución completa del trabajo práctico y queda preparado para iteraciones futuras.
 
-## Alcance Entrega 03 (actual)
+## Entrega 03 - Modelado de la solución (completada)
+
+Foco de la entrega: implementación, validación y persistencia de los modelos. Todo el trabajo es reproducible mediante notebooks.
 
 ### Modelado y validación
 
 - `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb`
   - Clustering de clientes (K-Means) con features RFM + atributos enriquecidos.
+  - Preprocesamiento (log1p + estandarización) empaquetado en un `Pipeline` de scikit-learn, serializado junto al modelo para una inferencia reproducible.
 - `notebooks/5-models/08-gc-churn-2026_04_16.ipynb`
-  - Modelo supervisado de churn y evaluación con métricas de clasificación.
+  - Modelo supervisado de churn (Random Forest) y evaluación con métricas de clasificación (AUC-ROC, F1, precisión, recall, matriz de confusión).
 - `notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb`
-  - Análisis combinado segmentos + churn, interpretación y reflexión crítica.
+  - Análisis combinado segmentos + churn, interpretación de negocio y reflexión crítica sobre el rendimiento y posibles mejoras.
 
-### Prototipo funcional
+### Persistencia de modelos (reutilizables sin reentrenar)
+
+- Modelos: `data/06_models/kmeans_model.pkl`, `data/06_models/churn_model.pkl`
+- Salidas: `data/07_model_output/clientes_segmentados.parquet`, `data/07_model_output/churn_predictions.parquet`
+- Reporting: `data/08_reporting/*.png` (segmentos, churn y evaluación)
+
+## Entrega 04 - Despliegue y presentación (en progreso)
+
+Foco de la entrega: operacionalizar la solución mediante un servicio e interfaz de uso, y comunicarla en una presentación oral.
+
+### Interfaz funcional (prototipo)
 
 - `notebooks/7-deploy/streamlit_app.py`
+  - Resumen ejecutivo con KPIs de negocio y validación técnica del modelo de churn.
   - Exploración de segmentos.
   - Ranking de clientes en riesgo.
   - Buscador de cliente.
@@ -55,13 +72,13 @@ Este repositorio refleja la evolución completa del trabajo práctico y queda pr
 
 Vista del prototipo:
 
-![Prototipo Streamlit - simulador de churn y segmento](assets/streamlit-simulador-entrega03.png)
+![Prototipo Streamlit - simulador de churn y segmento](assets/streamlit-simulador-entrega04.png)
 
-### Artefactos esperados
+### Pendiente
 
-- Modelos: `data/06_models/kmeans_model.pkl`, `data/06_models/churn_model.pkl`
-- Salidas: `data/07_model_output/clientes_segmentados.parquet`, `data/07_model_output/churn_predictions.parquet`
-- Reporting: `data/08_reporting/*.png` (segmentos, churn y evaluación)
+- Capa de servicio (API REST) que exponga los modelos persistidos, separando la lógica de modelo de la capa de servicio.
+- Consumo del servicio desde la interfaz.
+- Presentación oral del proyecto (10-15 min) con demostración en vivo.
 
 ---
 
@@ -168,13 +185,15 @@ Por defecto queda disponible en `http://127.0.0.1:8501`.
 
 ## Qué revisar primero (docentes)
 
-Para una revisión rápida del entregable:
+Para una revisión rápida de los entregables:
 
 1. `README.md` (este documento).
-2. `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb`.
-3. `notebooks/5-models/08-gc-churn-2026_04_16.ipynb`.
-4. `notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb`.
-5. `notebooks/7-deploy/streamlit_app.py` (prototipo).
+2. Entrega 03 (modelado):
+   - `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb`.
+   - `notebooks/5-models/08-gc-churn-2026_04_16.ipynb`.
+   - `notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb`.
+3. Entrega 04 (despliegue e interfaz):
+   - `notebooks/7-deploy/streamlit_app.py` (prototipo).
 
 ## Nota sobre versionado de datos
 

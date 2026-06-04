@@ -96,21 +96,34 @@ Los profesores señalaron que el dataset tiene pocas variables (solo 8 columnas)
 
 **Verificación:** Ver `notebooks/ENTREGA02_CUMPLIMIENTO.md` para cumplimiento 100% con PDF de consigna
 
-### Entrega 03 - Modelado y Presentación (23/06/2026)
-**Estado:** 🚧 EN PROGRESO
-**Avance local validado (19/04/2026):**
+> **Nota (03/06/2026):** La consigna del TP se actualizó y ahora son **4 entregas**: la antigua Entrega 03 (modelado + despliegue + presentación) se dividió en **Entrega 03 (Modelado de la solución)** y **Entrega 04 (Despliegue y presentación de la solución)**.
+
+### Entrega 03 - Modelado de la solución
+**Estado:** ✅ COMPLETADA
+**Avance validado:**
 - ✅ Notebook de clustering ejecutado: `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb`
 - ✅ Notebook de churn ejecutado: `notebooks/5-models/08-gc-churn-2026_04_16.ipynb`
 - ✅ Notebook de interpretación ejecutado: `notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb`
 - ✅ Modelos serializados: `data/06_models/kmeans_model.pkl`, `data/06_models/churn_model.pkl`
 - ✅ Outputs generados: `data/07_model_output/clientes_segmentados.parquet`, `data/07_model_output/churn_predictions.parquet`
 
-**Contenido esperado:**
-- Implementación de modelos (predictivos/descriptivos/clustering)
-- Validación con métricas apropiadas
-- Prototipo funcional (Streamlit/Flask/Dashboard)
-- Propuesta de despliegue
-- Presentación oral (10-15 min)
+**Contenido cubierto:**
+- Implementación de modelos (clustering K-Means + churn Random Forest)
+- Validación con métricas apropiadas (AUC-ROC, F1, precisión, recall, matriz de confusión; silhouette para clustering)
+- Análisis de resultados y reflexión crítica
+- Persistencia de modelos en formato reutilizable (`.pkl`) sin necesidad de reentrenar
+
+### Entrega 04 - Despliegue y presentación de la solución
+**Estado:** 🚧 EN PROGRESO
+
+**Avance:**
+- ✅ Interfaz funcional (prototipo) en Streamlit: `notebooks/7-deploy/streamlit_app.py`
+
+**Pendiente:**
+- ⏳ Capa de servicio (API REST) que exponga los modelos persistidos, con separación entre lógica de modelo y capa de servicio
+- ⏳ Consumo del servicio desde la interfaz
+- ⏳ Despliegue en un entorno accesible
+- ⏳ Presentación oral (10-15 min) con demostración en vivo
 
 ## Estructura del Repositorio
 
@@ -295,7 +308,7 @@ Ejemplo: `01-gc-carga_y_limpieza-2026_03_18.ipynb`
 3. Evaluación con métricas apropiadas
 4. Interpretación de resultados (`6-interpretation/`)
 
-### Fase 3: Despliegue y Comunicación
+### Fase 3: Despliegue y Comunicación (Entrega 04)
 1. Prototipo funcional (`7-deploy/`)
    - Streamlit app para segmentación
    - Dashboard interactivo
@@ -534,11 +547,12 @@ Tras el feedback de los profesores (25/03/2026) sobre la limitación de variable
 ### PDFs del Proyecto
 - `[01] Propuesta de proyecto - Grupo 12 - Ecommerce.pdf`
 - `[02] Recopilación y preparación de datos.pdf`
-- `[03] Modelado y presentación de la solución.pdf`
+- `[03] Modelado de la solución.pdf`
+- `[04] Despliegue del modelo y presentación de la solución.pdf`
 
 ### Documentos de la Materia
 - `Ciencia de datos aplicada - Temario y contexto materia.txt`
-- `Consignas unificadas del Trabajo Práctico - Entregas 01 a 03.txt`
+- `Consignas unificadas del Trabajo Práctico - Entregas 01 a 04.txt`
 
 ## Contacto y Referencias
 
@@ -631,10 +645,11 @@ def execute_notebook(notebook_path):
 - ✅ **Feedback post-Entrega 01:** Enriquecer dataset - Fase 1 completada con regex (01/04/2026)
 - ✅ **Enriquecimiento Fase 1:** Completado - 3,877 productos con 58 columnas (+50 nuevas)
 - ✅ **Visualizaciones:** 14 gráficos totales (10 EDA + 4 enriquecimiento)
-- 📅 **Presentación Entrega 02:** 29/04/2026 (en 26 días)
-- 🚧 **Entrega 03:** En progreso (fecha límite: 23/06/2026)
-  - Modelos locales ya generados: clustering K-Means + churn
-  - Próxima prioridad: consolidar narrativa, despliegue y presentación
+- 📅 **Presentación Entrega 02:** 29/04/2026
+- ✅ **Entrega 03 (Modelado):** Completada - clustering K-Means + churn Random Forest, validados y serializados
+- 🚧 **Entrega 04 (Despliegue y presentación):** En progreso
+  - Interfaz Streamlit funcional sobre los modelos persistidos
+  - Pendiente: capa de servicio/API, consumo desde la interfaz y presentación oral
 
 ### Entorno de Desarrollo
 - Python 3.11.9 vía pyenv (con warnings de hashlib que pueden ignorarse)
@@ -668,13 +683,13 @@ def execute_notebook(notebook_path):
 - Justificación del dataset en notebook 01, celda 2
 - Reflexión final completa en notebook 04, última celda
 
-### Archivos para Entrega 03
+### Archivos para Entregas 03 y 04
 
-**Completados:**
+**Entrega 03 - Modelado (Completados):**
 - ✅ `notebooks/4-feat_eng/05-gc-product_enrichment_regex-2026_04_01.ipynb` - Enriquecimiento Fase 1 con regex
 - ✅ `data/04_feature/productos_enriquecidos_regex.parquet` - 3,877 productos con 58 columnas
 - ✅ `data/04_feature/rfm_clientes_enriched.parquet` - RFM + preferencias de producto
-- ✅ `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb` - Clustering K-Means con features enriquecidos
+- ✅ `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb` - Clustering K-Means (preprocesamiento en Pipeline serializado)
 - ✅ `notebooks/5-models/08-gc-churn-2026_04_16.ipynb` - Modelo supervisado de churn
 - ✅ `notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb` - Interpretación de segmentos y dashboard
 - ✅ `data/05_model_input/churn_dataset.parquet` - Dataset para entrenamiento de churn
@@ -683,10 +698,12 @@ def execute_notebook(notebook_path):
 - ✅ `data/07_model_output/clientes_segmentados.parquet` - Clientes segmentados
 - ✅ `data/07_model_output/churn_predictions.parquet` - Predicciones de churn
 
-**Pendientes:**
-- ⏳ `notebooks/7-deploy/09-gc-streamlit_app-2026_XX_XX.ipynb` - Prototipo interactivo
+**Entrega 04 - Despliegue e interfaz:**
+- ✅ `notebooks/7-deploy/streamlit_app.py` - Prototipo interactivo (interfaz)
+- ⏳ Capa de servicio (API REST) + consumo desde la interfaz
+- ⏳ Despliegue en entorno accesible y presentación oral
 
-### Próximos Pasos (Entrega 03)
+### Próximos Pasos (Entregas 03 y 04)
 
 **PRIORIDAD 1: Enriquecimiento del Dataset ✅ COMPLETADA (Fase 1)**
 1. ✅ Implementar extracción de atributos con regex (color, material, tamaño, estilo) - 01/04/2026
@@ -705,11 +722,12 @@ def execute_notebook(notebook_path):
 11. ✅ Interpretación de segmentos (perfiles, etiquetas de negocio)
 12. ✅ Predicciones de churn generadas y guardadas localmente
 
-**PRIORIDAD 4: Despliegue y Presentación**
-13. Prototipo Streamlit/Flask con segmentación interactiva
-14. Integrar modelos locales en dashboard o demo
-15. Documentación final y narrativa
-16. Presentación oral (10-15 min): enfatizar enriquecimiento de datos como respuesta al feedback
+**PRIORIDAD 4: Despliegue y Presentación (Entrega 04)**
+13. ✅ Prototipo Streamlit con segmentación y scoring interactivo
+14. Capa de servicio (API REST) que exponga los modelos persistidos
+15. Consumo del servicio desde la interfaz y despliegue en entorno accesible
+16. Documentación final y narrativa
+17. Presentación oral (10-15 min): enfatizar enriquecimiento de datos como respuesta al feedback
 
 ### Ejecución de Notebooks
 - **NO usar** `jupyter nbconvert --execute` directamente (puede fallar con paths relativos)

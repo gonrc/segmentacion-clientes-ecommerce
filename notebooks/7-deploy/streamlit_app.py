@@ -237,7 +237,7 @@ def render_header() -> None:
         layout="wide",
     )
     st.title("Segmentación y Churn de Clientes E-commerce")
-    st.caption("Entrega 03 - Prototipo funcional para exploración, scoring y despliegue")
+    st.caption("Entrega 04 - Prototipo funcional para exploración, scoring y despliegue")
 
 
 def render_sidebar(customer_table: pd.DataFrame) -> None:

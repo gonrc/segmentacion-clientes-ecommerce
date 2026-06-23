@@ -5,7 +5,7 @@
 
 **Trabajo Práctico - Ciencia de Datos Aplicada | ITBA | 1er Cuatrimestre 2026 | Grupo 12**
 
-> **Estado actual (03/06/2026):** Entregas 01, 02 y 03 finalizadas. Entrega 04 (despliegue + interfaz + presentación oral) en progreso, con prototipo funcional en Streamlit sobre los modelos persistidos.
+> **Estado actual (22/06/2026):** Entregas 01, 02 y 03 finalizadas. Entrega 04 (despliegue + interfaz + presentación oral) en progreso: **API REST (FastAPI)** que expone los modelos, **interfaz Streamlit que consume la API** y orquestación local con **Docker Compose**. Pendiente: despliegue en entorno público y presentación oral.
 
 ---
 
@@ -32,7 +32,7 @@ El Trabajo Práctico se compone de **cuatro entregas**:
 | Entrega 01 - Propuesta de proyecto | Completada | Definición del problema, objetivo de negocio, alcance y elección del dataset. |
 | Entrega 02 - Recopilación y preparación de datos | Completada | Adquisición del dataset, EDA, limpieza, RFM y enriquecimiento de productos vía regex. |
 | Entrega 03 - Modelado de la solución | Completada | Modelos de segmentación (K-Means) y churn (Random Forest), validación con métricas y persistencia de modelos reutilizables. |
-| Entrega 04 - Despliegue y presentación | En progreso | Interfaz funcional en Streamlit sobre los modelos persistidos. Pendiente: capa de servicio/API y presentación oral. |
+| Entrega 04 - Despliegue y presentación | En progreso | API REST (FastAPI) que expone los modelos + interfaz Streamlit que la consume + Docker Compose. Pendiente: despliegue público y presentación oral. |
 
 Este repositorio refleja la evolución completa del trabajo práctico y queda preparado para iteraciones futuras.
 
@@ -46,7 +46,8 @@ Foco de la entrega: implementación, validación y persistencia de los modelos. 
 
 - `notebooks/5-models/07-gc-clustering-2026_04_15.ipynb`
   - Clustering de clientes (K-Means) con features RFM + atributos enriquecidos.
-  - Preprocesamiento (log1p + estandarización) empaquetado en un `Pipeline` de scikit-learn, serializado junto al modelo para una inferencia reproducible.
+  - Preprocesamiento (log1p + estandarización + **PCA**) empaquetado en un `Pipeline` de scikit-learn, serializado junto al modelo para una inferencia reproducible.
+  - **Mejora post-feedback (Entrega 03):** se excluyó `Cancel_rate` del clustering (feature ruidosa: 64% de ceros y outliers extremos) y se agregó PCA antes de K-Means. El silhouette subió de **0.17 a 0.31 (+80%)**, con clusters más separados y manteniendo los 4 segmentos de negocio.
 - `notebooks/5-models/08-gc-churn-2026_04_16.ipynb`
   - Modelo supervisado de churn (Random Forest) y evaluación con métricas de clasificación (AUC-ROC, F1, precisión, recall, matriz de confusión).
 - `notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb`
@@ -62,24 +63,41 @@ Foco de la entrega: implementación, validación y persistencia de los modelos. 
 
 Foco de la entrega: operacionalizar la solución mediante un servicio e interfaz de uso, y comunicarla en una presentación oral.
 
-### Interfaz funcional (prototipo)
+### Arquitectura (servicio + interfaz desacoplados)
 
-- `notebooks/7-deploy/streamlit_app.py`
-  - Resumen ejecutivo con KPIs de negocio y validación técnica del modelo de churn.
-  - Exploración de segmentos.
-  - Ranking de clientes en riesgo.
-  - Buscador de cliente.
-  - Simulador de nuevos clientes con muestreo aleatorio realista.
-  - Sección de propuesta de despliegue.
+```
+Streamlit (interfaz) ──POST /predict──▶ API REST (FastAPI) ──▶ src/inference (lógica) ──▶ modelos .pkl
+```
+
+Separación explícita entre **lógica de modelo** y **capa de servicio**:
+
+- `src/inference/model_service.py` — lógica de inferencia pura (carga de modelos y scoring), sin dependencias de HTTP. Reutilizable por la API, los tests o jobs batch.
+- `api/` — capa de servicio FastAPI: validación de entradas/salidas con Pydantic, manejo de errores (422 validación, 503 modelos no cargados, 500 inferencia) y documentación OpenAPI automática en `/docs`.
+- `notebooks/7-deploy/streamlit_app.py` — interfaz; el simulador consume la API (`api_client.py`) para scorear clientes nuevos.
+
+Endpoints: `GET /health`, `GET /metadata`, `POST /predict`, `POST /predict/churn`, `POST /predict/segment`, `POST /predict/batch`. Detalle y ejemplos en [`deploy/README.md`](deploy/README.md).
+
+### Levantar la solución (Docker)
+
+```bash
+docker compose -f deploy/docker-compose.yml up --build
+# API:       http://localhost:8000/docs
+# Interfaz:  http://localhost:8501
+```
 
 Vista del prototipo:
 
 ![Prototipo Streamlit - simulador de churn y segmento](assets/streamlit-simulador-entrega04.png)
 
+### Tests
+
+```bash
+uv run pytest tests/test_api.py tests/inference/test_model_service.py -v
+```
+
 ### Pendiente
 
-- Capa de servicio (API REST) que exponga los modelos persistidos, separando la lógica de modelo de la capa de servicio.
-- Consumo del servicio desde la interfaz.
+- Despliegue en un entorno público accesible (p. ej. Render/Railway para la API + Streamlit Cloud).
 - Presentación oral del proyecto (10-15 min) con demostración en vivo.
 
 ---
@@ -160,6 +178,8 @@ Por defecto queda disponible en `http://127.0.0.1:8501`.
 
 ```text
 .
+├── api/                # Capa de servicio (FastAPI): main.py, schemas.py
+├── deploy/             # Dockerfile, docker-compose.yml y guía de despliegue
 ├── conf/
 ├── data/
 │   ├── 01_raw/
@@ -177,9 +197,10 @@ Por defecto queda disponible en `http://127.0.0.1:8501`.
 │   ├── 4-feat_eng/
 │   ├── 5-models/
 │   ├── 6-interpretation/
-│   ├── 7-deploy/
+│   ├── 7-deploy/       # streamlit_app.py + api_client.py
 │   └── 8-reports/
 ├── src/
+│   └── inference/      # model_service.py (lógica de modelo)
 ├── tests/
 ├── pyproject.toml
 └── README.md
@@ -196,7 +217,9 @@ Para una revisión rápida de los entregables:
    - Detalle: `notebooks/5-models/08-gc-churn-2026_04_16.ipynb`.
    - Detalle: `notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb`.
 3. Entrega 04 (despliegue e interfaz):
-   - `notebooks/7-deploy/streamlit_app.py` (prototipo).
+   - `deploy/README.md` (arquitectura y cómo levantar la solución).
+   - `api/main.py` (capa de servicio) + `src/inference/model_service.py` (lógica de modelo).
+   - `notebooks/7-deploy/streamlit_app.py` (interfaz que consume la API).
 
 ## Nota sobre versionado de datos
 

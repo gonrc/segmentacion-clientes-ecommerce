@@ -3,12 +3,19 @@ from __future__ import annotations
 
 import pickle
 import random
+import sys
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 import streamlit as st
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, silhouette_score
+
+# Cliente de la API REST (consumo del servicio desde la interfaz - Entrega 04).
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from api_client import API_URL, ApiError
+from api_client import health as api_health
+from api_client import score_customer as api_score_customer
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT / "data"
@@ -251,6 +258,17 @@ def render_sidebar(customer_table: pd.DataFrame) -> None:
     st.sidebar.write("Modelos usados:")
     st.sidebar.write("- K-Means para segmentación")
     st.sidebar.write("- Random Forest para churn")
+    st.sidebar.markdown("---")
+    st.sidebar.write("Servicio de scoring (API REST):")
+    try:
+        status = api_health()
+        if status.get("models_loaded"):
+            st.sidebar.success(f"API conectada · {API_URL}")
+        else:
+            st.sidebar.warning(f"API degradada · {status.get('detail', 'modelos no cargados')}")
+    except ApiError:
+        st.sidebar.error(f"API no disponible · {API_URL}")
+        st.sidebar.caption("Levantala con `docker compose up` o `uvicorn api.main:app`.")
 
 
 def render_executive_summary(customer_table: pd.DataFrame) -> None:
@@ -751,16 +769,6 @@ def collect_simulation_inputs(
     return values
 
 
-def predict_probability(bundle: dict[str, Any], values: dict[str, float]) -> float:
-    features = list(bundle["features"])
-    model_input = pd.DataFrame([{feature: values.get(feature, 0.0) for feature in features}])
-    scaler_input = (
-        model_input if hasattr(bundle["scaler"], "feature_names_in_") else model_input.to_numpy()
-    )
-    transformed = bundle["scaler"].transform(scaler_input)
-    return float(bundle["model"].predict_proba(transformed)[0, 1])
-
-
 def predict_segment(
     bundle: dict[str, Any],
     values: dict[str, float],
@@ -777,35 +785,58 @@ def predict_segment(
 
 
 def render_simulator(churn_dataset: pd.DataFrame, segmented: pd.DataFrame) -> None:
-    churn_bundle = load_pickle(str(ARTIFACTS["churn_model"]))
     kmeans_bundle = load_pickle(str(ARTIFACTS["kmeans_model"]))
     labels = cluster_label_map(segmented)
+
+    st.caption(
+        f"El scoring se calcula consumiendo la **API REST** (`POST {API_URL}/predict`). "
+        "La generación de clientes random es asistencia local de la interfaz."
+    )
 
     with st.container(border=True):
         values = collect_simulation_inputs(churn_dataset, segmented, kmeans_bundle, labels)
 
     with st.container(border=True):
         if st.button("Calcular score", type="primary"):
-            probability = predict_probability(churn_bundle, values)
-            segment = predict_segment(kmeans_bundle, values, labels)
-            risk = risk_level(probability)
+            try:
+                result = api_score_customer(values)
+            except ApiError as exc:
+                st.error(str(exc))
+                st.info(
+                    "Verificá que la API esté levantada: "
+                    "`uvicorn api.main:app --port 8000` o `docker compose up`."
+                )
+                return
 
+            probability = float(result["churn_probability"])
             col1, col2, col3 = st.columns(3)
             col1.metric("Probabilidad de churn", format_pct(probability))
-            col2.metric("Nivel de riesgo", risk)
-            col3.metric("Segmento estimado", segment)
-            st.success(segment_recommendation(segment, probability))
+            col2.metric("Nivel de riesgo", result["risk_level"])
+            col3.metric("Segmento estimado", result["segment_label"])
+            st.success(result["recommendation"])
+            with st.expander("Respuesta cruda de la API"):
+                st.json(result)
 
 
 def render_deployment() -> None:
     with st.container(border=True):
-        st.subheader("Arquitectura propuesta")
+        st.subheader("Arquitectura implementada")
         st.write(
-            "La solución puede operar como un proceso batch semanal o mensual: ingesta de nuevas "
-            "transacciones, limpieza, generación de features, scoring de modelos y publicación en "
-            "dashboard interno o CRM."
+            "La solución está desacoplada en dos servicios que se comunican vía HTTP:\n\n"
+            "- **API REST (FastAPI)**: expone los modelos persistidos (`/predict`, "
+            "`/predict/churn`, `/predict/segment`, `/predict/batch`). Lógica de modelo en "
+            "`src/inference/`, capa de servicio en `api/`.\n"
+            "- **Interfaz (Streamlit)**: esta app; el simulador consume la API para scorear "
+            "clientes nuevos.\n\n"
+            "Ambos servicios se levantan juntos con `docker compose up` (la interfaz apunta a "
+            "la API por la variable `API_URL`)."
         )
-        st.caption("Estado actual: MVP local funcional con Streamlit y artefactos precalculados.")
+        st.caption(f"Endpoint de scoring configurado: {API_URL}")
+        try:
+            status = api_health()
+            st.success(f"Estado de la API: {status}")
+        except ApiError as exc:
+            st.warning(f"API no disponible en este momento: {exc}")
 
     with st.container(border=True):
         st.subheader("Recursos requeridos")

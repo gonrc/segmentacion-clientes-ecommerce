@@ -1,0 +1,43 @@
+# Orquestación local de la solución desplegada (Entrega 04).
+#
+#   docker compose -f deploy/docker-compose.yml up --build
+#
+# Levanta dos servicios desacoplados:
+#   - api       : capa de servicio FastAPI  -> http://localhost:8000  (docs en /docs)
+#   - streamlit : interfaz que consume la API -> http://localhost:8501
+#
+# Los datos/modelos se montan read-only desde ./data del repo (no se hornean en la imagen).
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: segmentacion-grupo12:latest
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      MODELS_DIR: /app/data/06_models
+    volumes:
+      - ../data:/app/data:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  streamlit:
+    # Reusa la misma imagen construida por el servicio api.
+    image: segmentacion-grupo12:latest
+    command: streamlit run notebooks/7-deploy/streamlit_app.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    environment:
+      # La interfaz consume la API por el nombre de servicio de la red de compose.
+      API_URL: http://api:8000
+    volumes:
+      - ../data:/app/data:ro
+    depends_on:
+      api:
+        condition: service_healthy

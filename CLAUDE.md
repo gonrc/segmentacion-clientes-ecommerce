@@ -113,17 +113,29 @@ Los profesores señalaron que el dataset tiene pocas variables (solo 8 columnas)
 - Análisis de resultados y reflexión crítica
 - Persistencia de modelos en formato reutilizable (`.pkl`) sin necesidad de reentrenar
 
+**Mejora aplicada tras feedback docente (silhouette bajo ≈0.17):**
+- Se **excluyó `Cancel_rate`** del clustering (64% de ceros + outliers extremos = ruido; se conserva como feature del modelo de churn y como descriptor de negocio).
+- Se agregó **PCA (3 componentes, ~64% varianza)** al `Pipeline` antes de K-Means (reducción de dimensionalidad, U4 del temario).
+- Resultado: silhouette de **0.174 → 0.314 (+80%)**, k=4 conservado para mantener los 4 segmentos de negocio. Nuevo mapeo: `{0: VIP, 1: Dormidos, 2: Compradores de Sets, 3: En Riesgo}`. El clustering pasó de 9 a **8 features**; la unión de features de la API no cambia (Cancel_rate sigue en el modelo de churn).
+
 ### Entrega 04 - Despliegue y presentación de la solución
 **Estado:** 🚧 EN PROGRESO
 
 **Avance:**
-- ✅ Interfaz funcional (prototipo) en Streamlit: `notebooks/7-deploy/streamlit_app.py`
+- ✅ **Capa de servicio (API REST) en FastAPI**: `api/main.py` + `api/schemas.py`. Endpoints `/health`, `/metadata`, `/predict`, `/predict/churn`, `/predict/segment`, `/predict/batch`. Validación de entradas/salidas con Pydantic, manejo de errores (422 validación / 503 modelos no cargados / 500 inferencia) y docs OpenAPI en `/docs`.
+- ✅ **Separación lógica de modelo / capa de servicio**: lógica de inferencia pura en `src/inference/model_service.py` (clase `ModelService`, sin HTTP); la API solo enruta y valida.
+- ✅ **Consumo del servicio desde la interfaz**: el simulador de Streamlit scorea vía `POST /predict` usando `notebooks/7-deploy/api_client.py` (URL por `API_URL`). Indicador de estado de la API en el sidebar y pestaña de despliegue.
+- ✅ **Orquestación local con Docker**: `deploy/Dockerfile` + `deploy/docker-compose.yml` levantan API (8000) e interfaz (8501) desacopladas. Guía en `deploy/README.md`.
+- ✅ **Tests**: `tests/test_api.py` + `tests/inference/test_model_service.py` (17 tests; se saltean si faltan artefactos).
+- ✅ **Artefacto nuevo**: `data/06_models/cluster_labels.json` (mapeo cluster→segmento; evita que la API dependa del parquet completo).
+- ✅ Interfaz Streamlit: `notebooks/7-deploy/streamlit_app.py`
 
 **Pendiente:**
-- ⏳ Capa de servicio (API REST) que exponga los modelos persistidos, con separación entre lógica de modelo y capa de servicio
-- ⏳ Consumo del servicio desde la interfaz
-- ⏳ Despliegue en un entorno accesible
+- ⏳ Despliegue en un entorno público accesible (p. ej. Render/Railway para la API + Streamlit Cloud)
 - ⏳ Presentación oral (10-15 min) con demostración en vivo
+
+**Dependencias agregadas (uv → `pyproject.toml`):** `fastapi`, `uvicorn[standard]`, `requests`.
+**Nota de entorno:** correr Python con sklearn/scipy/pyarrow vía el sandbox de la herramienta Bash requiere `OPENBLAS_NUM_THREADS=1` (y afines) o el import se cuelga; no afecta a jupyter/Docker.
 
 ## Estructura del Repositorio
 

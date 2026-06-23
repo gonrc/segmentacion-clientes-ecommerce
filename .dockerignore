@@ -1,0 +1,24 @@
+# Mantener liviano el contexto de build (los datos/modelos se montan como volumen).
+.venv/
+.venv.bak-*/
+.git/
+data/
+docs/
+tests/
+**/__pycache__/
+**/*.pyc
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.ipython/
+.jupyter/
+assets/
+*.md
+!README.md
+notebooks/1-data/
+notebooks/2-exploration/
+notebooks/3-analysis/
+notebooks/4-feat_eng/
+notebooks/5-models/
+notebooks/6-interpretation/
+notebooks/8-reports/

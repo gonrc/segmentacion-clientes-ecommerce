@@ -12,39 +12,44 @@ from pydantic import BaseModel, Field
 class CustomerFeatures(BaseModel):
     """Features de un cliente a evaluar.
 
-    Solo ``Recency``, ``Frequency`` y ``Monetary`` son obligatorias; el resto tiene
-    default 0.0 para aceptar payloads parciales. Cada modelo toma internamente el
-    subconjunto de features que necesita.
+    Solo ``Recency``, ``Frequency`` y ``Monetary`` son obligatorias. El resto es opcional
+    (default ``None``): las features ausentes se **imputan con la mediana de entrenamiento**
+    en la capa de modelo, en vez de asumir 0 (que sesgaría el segmento). Cada modelo toma
+    internamente el subconjunto de features que necesita.
     """
 
     Recency: float = Field(..., ge=0, description="Días desde la última compra.")
     Frequency: float = Field(..., ge=0, description="Cantidad de compras (facturas).")
     Monetary: float = Field(..., ge=0, description="Revenue neto acumulado del cliente.")
-    Cancel_rate: float = Field(
-        0.0, ge=0, description="Tasa de cancelación en % (revenue cancelado / bruto x 100)."
+    Cancel_rate: float | None = Field(
+        None, ge=0, description="Tasa de cancelación en % (revenue cancelado / bruto x 100)."
     )
-    pct_with_color: float = Field(
-        0.0, ge=0, description="% de compras con color detectado (escala 0-100)."
+    pct_with_color: float | None = Field(
+        None, ge=0, description="% de compras con color detectado (escala 0-100)."
     )
-    color_diversity: float = Field(
-        0.0, ge=0, description="Cantidad de colores distintos comprados."
+    color_diversity: float | None = Field(
+        None, ge=0, description="Cantidad de colores distintos comprados."
     )
-    is_color_specialist: float = Field(
-        0.0, ge=0, le=1, description="1 si concentra sus compras en un color, 0 si no."
+    is_color_specialist: float | None = Field(
+        None, ge=0, le=1, description="1 si concentra sus compras en un color, 0 si no."
     )
-    pct_with_material: float = Field(
-        0.0, ge=0, description="% de compras con material detectado (escala 0-100)."
+    pct_with_material: float | None = Field(
+        None, ge=0, description="% de compras con material detectado (escala 0-100)."
     )
-    pct_purchases_sets: float = Field(
-        0.0, ge=0, description="% de compras que son sets/packs (escala 0-100)."
+    pct_purchases_sets: float | None = Field(
+        None, ge=0, description="% de compras que son sets/packs (escala 0-100)."
     )
-    avg_quantity_in_set: float = Field(0.0, ge=0, description="Cantidad promedio de ítems por set.")
-    avg_days_between_purchases: float = Field(0.0, ge=0, description="Días promedio entre compras.")
-    months_active: float = Field(0.0, ge=0, description="Meses con actividad de compra.")
-    n_products_unique: float = Field(
-        0.0, ge=0, description="Cantidad de productos únicos comprados."
+    avg_quantity_in_set: float | None = Field(
+        None, ge=0, description="Cantidad promedio de ítems por set."
     )
-    avg_order_value: float = Field(0.0, ge=0, description="Ticket promedio por compra.")
+    avg_days_between_purchases: float | None = Field(
+        None, description="Días promedio entre compras (-1 = sin dato suficiente)."
+    )
+    months_active: float | None = Field(None, ge=0, description="Meses con actividad de compra.")
+    n_products_unique: float | None = Field(
+        None, ge=0, description="Cantidad de productos únicos comprados."
+    )
+    avg_order_value: float | None = Field(None, ge=0, description="Ticket promedio por compra.")
 
     model_config = {
         "json_schema_extra": {
@@ -86,6 +91,7 @@ class ScoreResponse(SegmentResponse, ChurnResponse):
     """Respuesta combinada: segmento + churn + recomendación accionable."""
 
     recommendation: str = Field(..., description="Acción comercial sugerida.")
+    model_version: str = Field(..., description="Versión del modelo servido (trazabilidad).")
 
 
 class BatchScoreRequest(BaseModel):

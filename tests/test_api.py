@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from tests.conftest import requires_models
 
 pytestmark = requires_models
@@ -20,7 +22,40 @@ def test_health_ok(client) -> None:
 def test_metadata(client) -> None:
     resp = client.get("/metadata")
     assert resp.status_code == 200
-    assert len(resp.json()["required_features"]) == 14
+    body = resp.json()
+    assert len(body["required_features"]) == 14
+    # Versión de modelo y rangos por feature (MLOps / validación informada)
+    assert "model_version" in body
+    assert "feature_ranges" in body and "Monetary" in body["feature_ranges"]
+
+
+def test_predict_includes_model_version(client, sample_features) -> None:
+    body = client.post("/predict", json=sample_features).json()
+    assert body["model_version"]
+
+
+def test_vip_profile_is_labeled_vip(client) -> None:
+    """Un perfil claramente de alto valor (reciente, frecuente, alto gasto) cae en VIP."""
+    vip = {"Recency": 10, "Frequency": 30, "Monetary": 20000, "pct_purchases_sets": 5}
+    body = client.post("/predict/segment", json=vip).json()
+    assert body["segment_label"] == "VIP"
+
+
+def test_get_service_raises_503_without_models() -> None:
+    """El path de modelos no cargados devuelve 503 (no 500)."""
+    from fastapi import HTTPException
+
+    import api.main as m
+
+    saved = m._state.get("service")
+    m._state["service"] = None
+    m._state["error"] = "modelos no cargados (test)"
+    try:
+        with pytest.raises(HTTPException) as exc_info:
+            m.get_service()
+        assert exc_info.value.status_code == 503
+    finally:
+        m._state["service"] = saved
 
 
 def test_predict_churn(client, sample_features) -> None:

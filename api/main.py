@@ -11,6 +11,7 @@ Docs interactivas: http://localhost:8000/docs
 
 from __future__ import annotations
 
+import logging
 import os
 import sys
 from collections.abc import AsyncIterator
@@ -37,6 +38,9 @@ from api.schemas import (  # noqa: E402
 )
 from src.inference.model_service import ModelNotLoadedError, ModelService  # noqa: E402
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s | %(message)s")
+logger = logging.getLogger("api.scoring")
+
 # Estado del proceso: el servicio de modelos se carga una sola vez al arrancar.
 _state: dict[str, Any] = {"service": None, "error": None}
 
@@ -47,11 +51,15 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     try:
         _state["service"] = ModelService(models_dir=models_dir)
         _state["error"] = None
+        logger.info(
+            "Modelos cargados correctamente (%s)", _state["service"].metadata()["model_version"]
+        )
     except ModelNotLoadedError as exc:
         # No abortamos el arranque: /health reporta el problema y los endpoints
         # de predicción devuelven 503 con un mensaje claro.
         _state["service"] = None
         _state["error"] = str(exc)
+        logger.warning("No se pudieron cargar los modelos: %s", exc)
     yield
     _state.clear()
 
@@ -147,7 +155,14 @@ def predict(features: CustomerFeatures) -> ScoreResponse:
     try:
         result = service.score_customer(features.model_dump())
     except Exception as exc:
+        logger.exception("Error de inferencia en /predict")
         raise HTTPException(status_code=500, detail=f"Error de inferencia: {exc}") from exc
+    logger.info(
+        "/predict -> segmento=%s churn=%.3f riesgo=%s",
+        result["segment_label"],
+        result["churn_probability"],
+        result["risk_level"],
+    )
     return ScoreResponse(**result)
 
 

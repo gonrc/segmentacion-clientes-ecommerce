@@ -25,6 +25,9 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MODELS_DIR = ROOT / "data" / "06_models"
 
+# Versión de la solución servida (para trazabilidad / MLOps).
+MODEL_VERSION = "1.1.0"
+
 # Umbrales de negocio para traducir la probabilidad de churn a un nivel de riesgo.
 HIGH_RISK_THRESHOLD = 0.6
 MEDIUM_RISK_THRESHOLD = 0.4
@@ -100,6 +103,7 @@ class ModelService:
         self._kmeans: dict[str, Any] = {}
         self._churn: dict[str, Any] = {}
         self._cluster_labels: dict[int, str] = {}
+        self._feature_stats: dict[str, dict[str, float]] = {}
         self._load()
 
     # ------------------------------------------------------------------ carga
@@ -125,6 +129,13 @@ class ModelService:
 
         self._cluster_labels = {int(k): str(v) for k, v in raw_labels.items()}
 
+        # Estadísticas por feature (opcional): se usan para imputar features ausentes
+        # con la mediana y para exponer rangos. Si falta, se cae a imputación con 0.
+        stats_path = self.models_dir / "feature_stats.json"
+        if stats_path.exists():
+            with stats_path.open(encoding="utf-8") as fh:
+                self._feature_stats = json.load(fh)
+
     # --------------------------------------------------------------- metadata
     @property
     def churn_features(self) -> list[str]:
@@ -142,11 +153,17 @@ class ModelService:
     def segments(self) -> dict[str, str]:
         return dict(SEGMENT_DESCRIPTIONS)
 
+    @property
+    def feature_ranges(self) -> dict[str, dict[str, float]]:
+        return dict(self._feature_stats)
+
     def metadata(self) -> dict[str, Any]:
         return {
+            "model_version": MODEL_VERSION,
             "required_features": self.required_features,
             "churn_features": self.churn_features,
             "segment_features": self.segment_features,
+            "feature_ranges": self.feature_ranges,
             "segments": [
                 {"label": label, "description": desc}
                 for label, desc in SEGMENT_DESCRIPTIONS.items()
@@ -160,19 +177,32 @@ class ModelService:
         }
 
     # -------------------------------------------------------------- inferencia
-    @staticmethod
-    def _build_matrix(features: dict[str, float], feature_order: list[str], scaler: Any) -> Any:
+    def _impute(self, features: dict[str, float | None], name: str) -> float:
+        """Devuelve el valor de la feature o la mediana de entrenamiento si está ausente.
+
+        Imputar con la mediana (en vez de 0) evita distorsionar la asignación de segmento
+        cuando el cliente llega con features de producto/actividad sin informar.
+        """
+        value = features.get(name)
+        if value is None:
+            stat = self._feature_stats.get(name)
+            return float(stat["median"]) if stat else 0.0
+        return float(value)
+
+    def _build_matrix(
+        self, features: dict[str, float | None], feature_order: list[str], scaler: Any
+    ) -> Any:
         """Arma la matriz de entrada respetando el orden de features del modelo.
 
         El scaler del K-Means es un ``Pipeline`` entrenado con nombres de columna
         (``feature_names_in_``) y espera un DataFrame; el del churn es un
         ``StandardScaler`` sin nombres y espera un array. Replicamos esa distinción.
         """
-        frame = pd.DataFrame([{name: float(features.get(name, 0.0)) for name in feature_order}])
+        frame = pd.DataFrame([{name: self._impute(features, name) for name in feature_order}])
         scaler_input = frame if hasattr(scaler, "feature_names_in_") else frame.to_numpy()
         return scaler.transform(scaler_input)
 
-    def predict_churn(self, features: dict[str, float]) -> dict[str, Any]:
+    def predict_churn(self, features: dict[str, float | None]) -> dict[str, Any]:
         scaler = self._churn["scaler"]
         model = self._churn["model"]
         matrix = self._build_matrix(features, self.churn_features, scaler)
@@ -184,7 +214,7 @@ class ModelService:
             "risk_level": risk_level(probability),
         }
 
-    def predict_segment(self, features: dict[str, float]) -> dict[str, Any]:
+    def predict_segment(self, features: dict[str, float | None]) -> dict[str, Any]:
         scaler = self._kmeans["scaler"]
         model = self._kmeans["model"]
         matrix = self._build_matrix(features, self.segment_features, scaler)
@@ -196,7 +226,7 @@ class ModelService:
             "segment_description": SEGMENT_DESCRIPTIONS.get(label, ""),
         }
 
-    def score_customer(self, features: dict[str, float]) -> dict[str, Any]:
+    def score_customer(self, features: dict[str, float | None]) -> dict[str, Any]:
         """Scoring combinado: segmento + churn + recomendación de negocio."""
         churn = self.predict_churn(features)
         segment = self.predict_segment(features)
@@ -204,4 +234,5 @@ class ModelService:
             **segment,
             **churn,
             "recommendation": recommendation(segment["segment_label"], churn["churn_probability"]),
+            "model_version": MODEL_VERSION,
         }

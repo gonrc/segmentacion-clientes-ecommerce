@@ -46,6 +46,7 @@ REPORTS = {
     "churn_roc_curves": DATA_DIR / "08_reporting/churn_roc_curves.png",
     "clustering_k_selection": DATA_DIR / "08_reporting/clustering_k_selection.png",
     "clustering_heatmap": DATA_DIR / "08_reporting/clustering_heatmap.png",
+    "clustering_tsne": DATA_DIR / "08_reporting/clustering_tsne.png",
 }
 
 SEGMENT_ACTIONS = {
@@ -360,6 +361,9 @@ def render_segments(customer_table: pd.DataFrame) -> None:
             display_report_image("clustering_heatmap", "Centroides normalizados")
         with right:
             display_report_image("clustering_k_selection", "Selección de k")
+        display_report_image(
+            "clustering_tsne", "Proyección t-SNE de los segmentos (separación visual)"
+        )
 
 
 def render_churn(customer_table: pd.DataFrame) -> None:

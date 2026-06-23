@@ -87,6 +87,24 @@ lint: ## Run code quality tools with pre-commit hooks.
 	@echo "🚀 Linting, formating and Static type checking code: Running pre-commit"
 	@uv run pre-commit run ruff
 
+####----Modelado y despliegue (Entrega 03/04)----####
+regenerate_models: ## Reentrena/persiste modelos y artefactos en orden (07->08->09 + labels + stats)
+	@echo "🚀 Regenerando artefactos (segmentacion -> churn -> interpretacion)..."
+	MPLBACKEND=Agg uv run python execute_notebook.py "notebooks/5-models/07-gc-clustering-2026_04_15.ipynb"
+	MPLBACKEND=Agg uv run python execute_notebook.py "notebooks/5-models/08-gc-churn-2026_04_16.ipynb"
+	MPLBACKEND=Agg uv run python execute_notebook.py "notebooks/6-interpretation/09-gc-analisis_segmentos-2026_04_16.ipynb"
+	uv run python deploy/build_cluster_labels.py
+	uv run python deploy/build_feature_stats.py
+	@echo "✅ Artefactos en data/06_models/ y data/07_model_output/"
+
+serve_api: ## Levanta la API REST (FastAPI) en el puerto 8000
+	@echo "🚀 API en http://localhost:8000/docs"
+	uv run uvicorn api.main:app --host 0.0.0.0 --port 8000
+
+serve_app: ## Levanta la interfaz Streamlit en :8501 (consume la API via API_URL)
+	@echo "🚀 Interfaz en http://localhost:8501"
+	API_URL=$${API_URL:-http://localhost:8000} uv run streamlit run notebooks/7-deploy/streamlit_app.py --server.port 8501
+
 ####----Project----####
 help:
 	@printf "%-30s %s\n" "Target" "Description"

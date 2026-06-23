@@ -134,3 +134,6 @@ out/
 
 # Spyder
 .spyproject/
+
+# Configuracion local de herramientas/agentes
+.claude/
